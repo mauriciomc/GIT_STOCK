@@ -1,2 +1,2 @@
 # GIT_STOCK
-Stock analysis algorithm writen in Python
+Stock analysis algorithm written in Python
