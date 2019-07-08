@@ -35,6 +35,9 @@ def get_data_from_yahoo(reload_tickers=True):
 #get_data_from_yahoo()
 
 def compile_data():
+    print('START')
+    print('Ticker RSI MACD SIGNAL BUP BDN BM SENTIMENT') 
+ 
     tickers = pd.read_csv('bovespa_tickers.csv')
     
     main_df = pd.DataFrame()
@@ -65,19 +68,14 @@ def compile_data():
             up, down = delta.copy(), delta.copy()
             up   [up   < 0] = 0
             down [down > 0] = 0
-            #roll_up1 = pd.DataFrame.ewm(  up, 14)
-            #roll_dn1 = pd.DataFrame.ewm(down, 14)
             
-            #RS1  = roll_up1 / roll_dn1
-            #RSI1 = 100.0 - (100.0 / (1.0 + RS1))
-            
-            roll_up2 = up.rolling(window=26).mean().abs()
-            roll_dn2 = down.rolling(window=26).mean().abs()
+            roll_up2 = up.rolling(window=14).mean().abs()
+            roll_dn2 = down.rolling(window=14).mean().abs()
             
             RS2  = roll_up2 / roll_dn2
             RSI2 = 100.0 - (100.0 / (1.0 + RS2))
             
-            RSI = int(RSI2.iloc[last-1].item())
+            RSI = int(RSI2.iloc[-1])
        
         except:
             #print ('Cannot compute RSI')
@@ -87,8 +85,8 @@ def compile_data():
         
         ## Bollinger band computation *********** ##
         try:
-            mma_30 = df.rolling(window=26).mean()
-            std_30 = df.rolling(window=26).std()
+            mma_30 = df.rolling(window=20).mean()
+            std_30 = df.rolling(window=20).std()
         
             mma_last = mma_30.shape[0]-1
             std_last = std_30.shape[0]-1
@@ -101,43 +99,52 @@ def compile_data():
                
         try:
             last_index = df.shape[0]-1
-            stepup = (upper - mma_30.iloc[mma_last].item())
-            stepdn = (mma_30.iloc[mma_last].item() - lower)
-            dupper = upper - df.iloc[last_index].item()
+            mean   = mma_30.iloc[mma_last].item()
+            stepup = (upper - mean)/4
+            stepdn = (mean  - lower)/4
+            dupper = upper  - df.iloc[last_index].item()
             dlower = df.iloc[last_index].item() - lower
-       
-            if   (dupper < stepup  ) and dupper > 0 :
-                volatility =  1
-                trend      = -1
-                
-            elif (dupper < stepup*3) and dupper > 0 :
-                volatility =  1
-                trend      =  1
-                
-            elif (dupper <= stepup*4) and dupper > 0 :
-                volatility =  1
-                trend      =  0
-
-            elif (dlower >= stepdn*4) and dlower > 0:
-                volatility =  0
-                trend      =  1
             
-            elif (dlower > stepdn*3) and dlower > 0:
-                volatility = -1
-                trend      =  0
+            location = df.iloc[last_index].item() - mean
             
-            elif (dlower >= stepdn) and dlower > 0:
-                volatility = -1
-                trend      =  1
+            ## Divide 4 faixas entre a media e a upper band
+            
+            if location > 0:
+                if location > mean + stepup*4:
+                    volatility = 4
+                
+                elif location >= mean + stepup*3:
+                    volatility = 3
+                    
+                elif location >= mean + stepup*2:
+                    volatility = 2
+                
+                else:
+                    volatility = 1 
+            
+            ## Divide 4 faixas entre a media e o lower band
             else:
-                volatitilty = 0
-                trend       = 0
+                location = location * -1
+                if location > mean + stepdn*4:
+                    ## Chegando no lower band
+                    volatility = -3
+                
+                elif location >= mean + stepdn*3:
+                    volatility = -2
+                    
+                elif location >= mean + stepdn*2:
+                    volatility = -1
+                
+                else:
+                    volatility = 0 
+            
         except:
             print('Exception')
             continue
         ## ************************************** ##
         
         #print(volatility, trend)
+        
         
         ## MACD computation ##
         exp1 = df.ewm(span=12, adjust=False).mean()
@@ -170,52 +177,63 @@ def compile_data():
         
         print (float(dsignal))
         """
-        sentiment = 0
+        sentiment = 'HOLD'
+        
         try:
             ## MACD assumptions (MACD < Signal)
-            if macd.iloc[last-1].item() > signal.iloc[last-1].item():
-                if macd.iloc[last].item() < signal.iloc[last].item():
+            if macd.iloc[last-1].item() > signal.iloc[last-1].item() and macd.iloc[last].item() < signal.iloc[last].item():
                     ## Bollinger assumptions
-                    if volatility > 0 and trend < 0:
-                        sentiment = -1
+                    if volatility >= 1: 
+                        sentiment = 'HOLD'
                          ## RSI assumptions
-                        if RSI != -1:
+                        if RSI >= 0:
                             if RSI >= 80:
-                                print('Strong Sell ',ticker,' because is overbough RSI index >= 80%')
+                                ##print('Strong Sell ',ticker,' because is overbough RSI index >= 80%')
+                                sentiment = 'STRONG SELL'
                             elif RSI > 60 and RSI < 80:
-                                print('Sell        ',ticker,' RSI index between 60% and 80%') 
+                                ##print('Sell        ',ticker,' RSI index between 60% and 80%') 
+                                sentiment = 'SELL'
                             elif RSI >= 60 and RSI < 40:
-                                print('Weak Sell   ', ticker,' RSI index between 40% and 65%')
+                                ##print('Weak Sell   ', ticker,' RSI index between 40% and 65%')
+                                sentiment = 'WEAK SELL'
                             else:
-                                printf('Risky Sell ', ticker,' RSI index is < 40%')
+                                ##printf('Risky Sell ', ticker,' RSI index is < 40%')
+                                sentiment = 'RISKY SELL'
                         else:
-                            print('TSell       ',ticker, ' No RSI information')
+                            ##print('TSell       ',ticker, ' No RSI information')
+                            sentiment = 'TSELL?'
                     else:
-                        print('TSell       ',ticker, 'RSI: ', RSI)
+                        ##print('TSell       ',ticker, 'RSI: ', RSI)
+                        sentiment = 'HOLD'
                     
             ## MACD assumptions (MACD > Signal)   
-            elif macd.iloc[last-1].item() < signal.iloc[last-1].item():
-                if macd.iloc[last].item() > signal.iloc[last].item():
+            elif macd.iloc[last-1].item() < signal.iloc[last-1].item() and macd.iloc[last].item() > signal.iloc[last].item():
                     ## Bollinger assumptions
-                    if volatility < 0 and trend > 0:
-                        sentiment = 1
+                    if volatility <= 1: 
+                        sentiment = 'HOLD'
                         ## RSI assumptions
-                        if RSI != -1:
+                        if RSI >= 0:
                             if RSI <= 20:
-                                print('Strong Buy  ',ticker,' because is oversold RSI index <= 20%')
+                                ##print('Strong Buy  ',ticker,' because is oversold RSI index <= 20%')
+                                sentiment = 'STRONG BUY'
                             elif RSI > 20 and RSI < 40:
-                                print('Buy         ',ticker,' RSI index between 20% and 40%') 
+                                ##print('Buy         ',ticker,' RSI index between 20% and 40%') 
+                                sentiment = 'BUY'
                             elif RSI >= 40 and RSI < 65:
-                                print('Weak Buy    ', ticker,' RSI index between 40% and 65%')
+                                ##print('Weak Buy    ', ticker,' RSI index between 40% and 65%')
+                                sentiment = 'WEAK BUY'
                             else:
-                                print('Risky Buy   ', ticker,' RSI index is over 65%')
+                                ##print('Risky Buy   ', ticker,' RSI index is over 65%')
+                                sentiment = 'RISKY BUY'
                         else:
-                            print('TBuy       ', ticker, 'No RSI information')
+                            ##print('TBuy       ', ticker, 'No RSI information')
+                            sentiment = 'TBUY?'
                     else:
-                        print('TBuy        ',ticker, 'RSI: ', RSI)
-                        
+                        ##print('TBuy        ',ticker, 'RSI: ', RSI)
+                        sentiment = 'HOLD'
             else:
-                print('Hold        ',ticker)
+                ##print('Hold        ',ticker)
+                sentiment = 'HOLD'
             
         except:
             #print('Exception')
@@ -225,6 +243,16 @@ def compile_data():
         if macd.empty or signal.empty:
             print('Dataset empty')
             continue
+        
+        
+        print(ticker,  
+              round(RSI,2), 
+              round(macd.iloc[last].item(),2), 
+              round(signal.iloc[last].item(),2), 
+              round(upper,2), 
+              round(lower,2), 
+              round(mma_30.iloc[mma_last].item(),2), 
+              sentiment)
         
         if main_df.empty:
             main_df = df

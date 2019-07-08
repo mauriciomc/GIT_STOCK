@@ -41,8 +41,8 @@ def plot_ticker_analysis(market, ticker):
     df.drop(['Open','High','Low','Close','Volume'],1,inplace=True)
 
     ## Bollinger Computation *********************
-    mma_30 = df.rolling(window=26).mean()
-    std_30 = df.rolling(window=26).std()
+    mma_30 = df.rolling(window=20).mean()
+    std_30 = df.rolling(window=20).std()
         
     upper  = mma_30 + (std_30 * 2)
     lower  = mma_30 - (std_30 * 2)
@@ -61,8 +61,8 @@ def plot_ticker_analysis(market, ticker):
     #RS1  = roll_up1 / roll_dn1
     #RSI1 = 100.0 - (100.0 / (1.0 + RS1))
     
-    roll_up2 = up.rolling(window=26).mean().abs()
-    roll_dn2 = down.rolling(window=26).mean().abs()
+    roll_up2 = up.rolling(window=14).mean().abs()
+    roll_dn2 = down.rolling(window=14).mean().abs()
     
     RS2  = roll_up2 / roll_dn2
     RSI2 = 100.0 - (100.0 / (1.0 + RS2))
@@ -119,5 +119,5 @@ def plot_ticker_analysis(market, ticker):
     plt.show()
 
 
-plot_ticker_analysis('bovespa','BEEF3.SA')
+plot_ticker_analysis('bovespa','INPE3.SA')
 
