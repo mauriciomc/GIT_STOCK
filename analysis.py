@@ -77,10 +77,10 @@ def plot_ticker_analysis(market, ticker):
 
 
     ## Graph organization ***********************
-    ax1 = plt.subplot2grid((10,1),(0,0), rowspan=4, colspan=1 )
-    ax2 = plt.subplot2grid((10,1),(4,0), rowspan=3, colspan=1 )
-    ax3 = plt.subplot2grid((10,1),(7,0), rowspan=1, colspan=1 )
-    ax4 = plt.subplot2grid((10,1),(8,0), rowspan=2, colspan=1 )
+    #ax1 = plt.subplot2grid((10,1),(0,0), rowspan=4, colspan=1 )
+    #ax2 = plt.subplot2grid((10,1),(4,0), rowspan=3, colspan=1 )
+    #ax3 = plt.subplot2grid((10,1),(7,0), rowspan=1, colspan=1 )
+    #ax4 = plt.subplot2grid((10,1),(8,0), rowspan=2, colspan=1 )
     
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
 
@@ -119,5 +119,5 @@ def plot_ticker_analysis(market, ticker):
     plt.show()
 
 
-plot_ticker_analysis('bovespa','INPE3.SA')
+plot_ticker_analysis('bovespa','CSMG3.SA')
 

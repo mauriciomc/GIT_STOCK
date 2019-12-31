@@ -8,7 +8,9 @@ import pandas as pd
 import pandas_datareader.data as web
 import pickle
 import requests
-import fix_yahoo_finance as yf
+#import fix_yahoo_finance as yf
+import yfinance as yf
+
 import pyEX as p
 
 style.use('ggplot')
