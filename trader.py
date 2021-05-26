@@ -54,9 +54,19 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
         
-def show_portfolio(conn):
-    
+def show_open_trades(conn):
+    sql = ''' SELECT id, ticker, open_date, open_price from trades 
+              WHERE close_price = 0
+              ORDER BY open_date  
+          '''
+              
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
 
+    for row in rows:
+        print(row)       
+        
     return
 
 def get_rocp(first, second):
@@ -70,7 +80,7 @@ def get_data_from_yahoo(reload_tickers=True):
         os.makedirs('stock_data')
     
     tickers = pd.read_csv('tickers.csv')
-    end = dt.date.today()
+    end = dt.date.today() - dt.timedelta(days=1)
     start = end - dt.timedelta(days=400)
     
     for ticker in tickers:
@@ -108,27 +118,68 @@ def backtest(ticker, df):
         if row['buy'] > 0:
             bought_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
             bought = float(row['close'])
-            print(row['Date'] + " found buy: " + str(bought))
+            #print(row['Date'] + " found buy: " + str(bought))
         elif row['sell'] > 0:
             sold_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()             
             sold = float(row['close'])
-            print(row['Date'] + ' found sell: ' + str(sold))
+            #print(row['Date'] + ' found sell: ' + str(sold))
 
         if bought_date < sold_date and bought > 0 and sold > 0:
             profit = round(float(get_rocp(bought, sold)),4)
             total_profit = total_profit + profit
             if profit > 0:
-                print('trade ' + ticker + " PROFIT = " + str(profit))
+                #print('trade ' + ticker + " PROFIT = " + str(profit))
                 trades_wins = trades_wins + 1
                 wins = wins + profit
             else:
-                print('trade ' + ticker + " LOSS = " + str(profit))
+                #print('trade ' + ticker + " LOSS = " + str(profit))
                 trades_loss = trades_loss + 1
                 losses = losses + profit
             bought = 0
             sold = 0
             
     return total_profit, trades_loss, trades_wins, losses, wins  
+
+def strategy_ema_cross(df):
+    # Exponential Moving Averages
+    df['ema12']  = ta.EMA(df['close'],12)
+    df['ema50']  = ta.EMA(df['close'],50)
+    df['ema200'] = ta.EMA(df['close'],200)
+    
+    # Populate Buy signals
+    df.loc[ 
+        ( 
+            ( qtpylib.crossed_above(df['ema12'], df['ema50']) ) &
+            ( df['close'] > df['ema12'] ) &
+            ( df['volume'] > 0 ) 
+        ),
+        'buy'] = 1
+ 
+    # Populate Sell Signals
+    df.loc[
+        (
+            ( qtpylib.crossed_below(df['ema12'], df['ema50']) ) &
+            ( df['close'] < df['ema12'] ) &
+            ( df['volume'] > 0 ) 
+        ),
+        'sell'] = 1 
+    
+    # Replace NaN values with 0 
+    df=df.fillna(0)
+    df['action'] = 'hold'
+ 
+    # Disambiguation: Sell and Buy signals don't go together.
+    if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1]>0:
+        df['action'] = 'hold'
+    elif (df['buy'].iloc[-1]):
+        df['action'] = 'buy'
+    elif (df['sell'].iloc[-1]):
+        df['action'] = 'sell'
+    else:
+        df['action'] = 'hold'
+         
+    return df
+
 
 ## Default MACD strategy
 def strategy(df):
@@ -149,11 +200,6 @@ def strategy(df):
     df['macd']       = macd['macd']
     df['macdsignal'] = macd['macdsignal']
     df['macdhist']   = macd['macdhist']
- 
-    # Exponential Moving Averages
-    df['ema25']  = ta.EMA(df,25)
-    df['ema50']  = ta.EMA(df,50)
-    df['ema200'] = ta.EMA(df,200)
  
     # Triple Exponential Moving Average
     df['tema'] = ta.TEMA(df,9)
@@ -205,7 +251,11 @@ def compile_data(db, ticker, df):
     df.rename(columns = {'Adj Close': 'close'}, inplace=True)
  
     ##### ADD STRATEGY HERE #####
+    # Default strategy
     df = strategy(df)
+    
+    # Simple EMA crossover
+    # df = strategy_ema_cross(df)
  
     ###### INSERT OR UPDATE TRADE IN DB #######
     trade = ""
@@ -267,13 +317,12 @@ for ticker in tickers:
         continue
     
     df = compile_data(conn, ticker, df)
-    show_portfolio(conn)
     
     ticker_total_profits, trades_loss, trades_wins, losses, wins = backtest(ticker,df)
     print('\n')
     print('Ticker       : ' + ticker)
     print('Total Trades : ' + str(trades_loss+trades_wins))
-    print('Total Profit : ' + str(round(ticker_total_profits,2)))
+    print('Total Profit : ' + str(round(ticker_total_profits,2)) + " %")
     print('Trades Loss  : ' + str(trades_loss))
     print('Trades Wins  : ' + str(trades_wins))
     print('% Loss       : ' + str(round(losses,2)) + " %")
@@ -283,6 +332,10 @@ for ticker in tickers:
     total_trades = total_trades + trades_loss + trades_wins
     total_profits = total_profits + ticker_total_profits
     
-print("################        SUMMARY        ################ ")
+print("################        SUMMARY        ################")
 print("Total Trades    : " + str(total_trades))
 print("Total Profit    : " + str(round(total_profits,2)))
+print("#######################################################")
+print("###############       Open Trades      ################")
+print("ID -- Ticker --- Open Date -- Open Price")
+show_open_trades(conn)
