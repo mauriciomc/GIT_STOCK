@@ -108,21 +108,21 @@ def backtest(ticker, df):
         if row['buy'] > 0:
             bought_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
             bought = float(row['close'])
-            #print(row['Date'] + " found buy: " + str(bought))
+            print(row['Date'] + " found buy: " + str(bought))
         elif row['sell'] > 0:
             sold_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()             
             sold = float(row['close'])
-            #print(row['Date'] + ' found sell: ' + str(sold))
+            print(row['Date'] + ' found sell: ' + str(sold))
 
         if bought_date < sold_date and bought > 0 and sold > 0:
             profit = round(float(get_rocp(bought, sold)),4)
             total_profit = total_profit + profit
             if profit > 0:
-                #print('trade ' + ticker + " PROFIT = " + str(profit))
+                print('trade ' + ticker + " PROFIT = " + str(profit))
                 trades_wins = trades_wins + 1
                 wins = wins + profit
             else:
-                #print('trade ' + ticker + " LOSS = " + str(profit))
+                print('trade ' + ticker + " LOSS = " + str(profit))
                 trades_loss = trades_loss + 1
                 losses = losses + profit
             bought = 0
@@ -211,17 +211,34 @@ def compile_data(db, ticker, df):
     trade = ""
  
     if df['action'].iloc[-1] == 'buy':
-        sql = ''' INSERT OR REPLACE INTO trades(id,ticker,open_date,open_price,close_price) 
-                  VALUES( (SELECT id from trades where ticker = ? AND open_price != 0 AND close_price = 0),?,?,?,?) 
+        print("ADDING BUY")
+        sql = ''' INSERT OR REPLACE INTO trades(id,
+                                                ticker,
+                                                open_date,
+                                                open_price,
+                                                close_date,
+                                                close_price)
+                                                 
+                  VALUES( (SELECT id from trades where ticker = ? AND open_price != 0 AND close_price = 0), ?, ?, ?, ?, ?) 
               '''
-        trade = (ticker, ticker, df['Date'].iloc[-1], round(df['close'].iloc[-1],4), 0)
+        trade = (ticker, 
+                 ticker, 
+                 df['Date'].iloc[-1], 
+                 round(df['close'].iloc[-1],4),
+                 None, 
+                 0)
  
     if df['action'].iloc[-1] == 'sell':
+        print("ADDING SELL")
         sql = ''' UPDATE trades 
                   SET close_price = ?, close_date = ?  
-                  WHERE ticker = ? AND close_date = NULL  
+                  WHERE ticker = ? AND close_price = 0  
               '''
-        trade = (df['Date'].iloc[-1],round(df['close'].iloc[-1],4), ticker)     
+              
+        trade = (round(df['close'].iloc[-1],4), 
+                 df['Date'].iloc[-1],
+                 ticker)   
+           
         
     if trade:
         cur = conn.cursor()
