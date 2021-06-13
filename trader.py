@@ -17,6 +17,9 @@ import pyEX as p
 import talib.abstract as ta
 import freqtrade.vendor.qtpylib.indicators as qtpylib
 
+# Add ichimoku indicator
+from technical.indicators import ichimoku
+
 style.use('ggplot')
 
 import sqlite3
@@ -80,26 +83,26 @@ def get_data_from_yahoo(reload_tickers=True):
         os.makedirs('stock_data')
     
     tickers = pd.read_csv('tickers.csv')
-    end = dt.date.today() - dt.timedelta(days=1)
+    end = dt.date.today() #- dt.timedelta(days=3)
     start = end - dt.timedelta(days=400)
     
     for ticker in tickers:
         ticker = ticker
         if not os.path.exists('stock_data/{}.csv'.format(ticker)):
-            df = yf.download(ticker,start=start,end=end, ignore_index=True)
-            df.to_csv('stock_data/{}.csv'.format(ticker, ignore_index=True))
+            df = yf.download(ticker,group_by=ticker,start=start,end=end)
+            df.to_csv('stock_data/{}.csv'.format(ticker))
         else:
             df = pd.read_csv('stock_data/{}.csv'.format(ticker))
             if df.empty:
                 continue
-            print(df['Date'].iloc[-1], end)
+            print(ticker)
             new_date = dt.datetime.strptime(df['Date'].iloc[-1], '%Y-%m-%d').date()
             if new_date < end:
-                new_df = yf.download(ticker,start=new_date, end=end, ignore_index=True)
-                df.append(new_df, ignore_index=True)
-                df = df.drop_duplicates(subset='Date', keep="first", ignore_index=True)
-                df = df.sort_values(by='Date', ignore_index=True)
-                df.to_csv('stock_data/{}.csv'.format(ticker))
+                new_df = yf.download(ticker,group_by=ticker,start=new_date, end=end)
+                df.append(new_df)
+                df = df.drop_duplicates(subset='Date', keep="first")
+                df = df.sort_values(by='Date')
+                df.to_csv('stock_data/{}.csv'.format(ticker), index=False)
             
 def backtest(ticker, df):
     print("Backtesting "+ticker)
@@ -145,12 +148,20 @@ def strategy_ema_cross(df):
     df['ema12']  = ta.EMA(df['close'],12)
     df['ema50']  = ta.EMA(df['close'],50)
     df['ema200'] = ta.EMA(df['close'],200)
+    df=df.fillna(0)
+    
+    df['angle12'] = ta.LINEARREG_ANGLE(df['ema12'],2)
+    df['angle200'] = ta.LINEARREG_ANGLE(df['ema200'],2)
+    
     
     # Populate Buy signals
     df.loc[ 
         ( 
-            ( qtpylib.crossed_above(df['ema12'], df['ema50']) ) &
-            ( df['close'] > df['ema12'] ) &
+            ( df['close'].crossed_above(df['ema12']) ) &
+            ( df['ema12'] > df['ema50'] ) &
+            ( df['ema50'] > df['ema200'] ) &
+            ( df['angle12'] > 0 ) &
+            ( df['angle200'] > 0 ) &
             ( df['volume'] > 0 ) 
         ),
         'buy'] = 1
@@ -158,28 +169,75 @@ def strategy_ema_cross(df):
     # Populate Sell Signals
     df.loc[
         (
-            ( qtpylib.crossed_below(df['ema12'], df['ema50']) ) &
-            ( df['close'] < df['ema12'] ) &
+            ( df['close'].crossed_below(df['ema12']) ) &
             ( df['volume'] > 0 ) 
         ),
         'sell'] = 1 
-    
-    # Replace NaN values with 0 
-    df=df.fillna(0)
-    df['action'] = 'hold'
- 
-    # Disambiguation: Sell and Buy signals don't go together.
-    if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1]>0:
-        df['action'] = 'hold'
-    elif (df['buy'].iloc[-1]):
-        df['action'] = 'buy'
-    elif (df['sell'].iloc[-1]):
-        df['action'] = 'sell'
-    else:
-        df['action'] = 'hold'
          
     return df
 
+## Ichimoku Heiken aishi cloud
+def strategy_ichi(dataframe):
+#Heiken Ashi Candlestick Data
+    heikinashi = qtpylib.heikinashi(dataframe)        
+
+    dataframe['ha_open'] = heikinashi['open']
+    dataframe['ha_close'] = heikinashi['close']  
+    dataframe['ha_high'] = heikinashi['high'] 
+    dataframe['ha_low'] = heikinashi['low'] 
+    
+    ha_ichi = ichimoku( heikinashi,
+                        conversion_line_period=9, 
+                        base_line_periods=26,
+                        laggin_span=52, 
+                        displacement=26
+    )
+
+    dataframe['tenkan'] = ha_ichi['tenkan_sen']
+    dataframe['kijun'] = ha_ichi['kijun_sen']
+    dataframe['senkou_a'] = ha_ichi['senkou_span_a']
+    dataframe['senkou_b'] = ha_ichi['senkou_span_b']
+    dataframe['cloud_green'] = ha_ichi['cloud_green']
+    dataframe['cloud_red'] = ha_ichi['cloud_red']
+    dataframe['chikou'] = dataframe['ha_close'].shift(26)
+
+    
+    """
+    Senkou Span A > Senkou Span B = Cloud Green
+    Senkou Span B > Senkou Span A = Cloud Red
+    """
+    dataframe.loc[
+     (
+        (
+            (dataframe['ha_close'].crossed_above(dataframe['senkou_a'])) & 
+            (dataframe['ha_close'].shift(1) > dataframe['senkou_a']) &
+            (dataframe['ha_close'].shift(1) > dataframe['senkou_b']) &
+            (dataframe['cloud_green'] == True)
+        ) 
+        |
+        (
+            (dataframe['ha_close'].crossed_above(dataframe['senkou_b'])) &
+            (dataframe['ha_close'].shift(1) > dataframe['senkou_a']) &
+            (dataframe['ha_close'].shift(1) > dataframe['senkou_b']) &
+            (dataframe['cloud_red'] == True)
+        )
+        |
+        (
+            (dataframe['senkou_a'].crossed_above(dataframe['senkou_b']))
+        )
+     ),
+        'buy']=1
+
+    dataframe.loc[
+      (
+        (dataframe['ha_close'] < dataframe['senkou_a']) |
+        (dataframe['ha_close'] < dataframe['senkou_b']) |
+        (dataframe['chikou'].crossed_below(dataframe['tenkan'])) |
+        (dataframe['senkou_b'].crossed_above(dataframe['senkou_a']))
+      ),
+        'sell'] = 1
+
+    return dataframe
 
 ## Default MACD strategy
 def strategy(df):
@@ -223,13 +281,15 @@ def strategy(df):
         ),
         'sell'] = 1 
     ####### STRATEGY END ########
+    return df
  
+def disambiguity(df):
     # Replace NaN values with 0 
     df=df.fillna(0)
     df['action'] = 'hold'
  
     # Disambiguation: Sell and Buy signals don't go together.
-    if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1]>0:
+    if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1] > 0:
         df['action'] = 'hold'
     elif (df['buy'].iloc[-1]):
         df['action'] = 'buy'
@@ -252,11 +312,17 @@ def compile_data(db, ticker, df):
  
     ##### ADD STRATEGY HERE #####
     # Default strategy
-    df = strategy(df)
+    # df = strategy(df)
     
     # Simple EMA crossover
     # df = strategy_ema_cross(df)
  
+    # Ichimoku on heiken ashi cloud
+    df = strategy_ichi(df)
+    
+    ### Fix buy and sell on the same candle ###
+    df = disambiguity(df)
+    
     ###### INSERT OR UPDATE TRADE IN DB #######
     trade = ""
  
