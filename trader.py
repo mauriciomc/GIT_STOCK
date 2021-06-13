@@ -83,7 +83,7 @@ def get_data_from_yahoo(reload_tickers=True):
         os.makedirs('stock_data')
     
     tickers = pd.read_csv('tickers.csv')
-    end = dt.date.today() #- dt.timedelta(days=3)
+    end = dt.date.today() - dt.timedelta(days=3)
     start = end - dt.timedelta(days=400)
     
     for ticker in tickers:
@@ -105,7 +105,7 @@ def get_data_from_yahoo(reload_tickers=True):
                 df.to_csv('stock_data/{}.csv'.format(ticker), index=False)
             
 def backtest(ticker, df):
-    print("Backtesting "+ticker)
+    #print("Backtesting "+ticker)
     bought=0
     sold=0
     trades_loss=0
@@ -327,7 +327,7 @@ def compile_data(db, ticker, df):
     trade = ""
  
     if df['action'].iloc[-1] == 'buy':
-        print("ADDING BUY")
+        # print("ADDING BUY")
         sql = ''' INSERT OR REPLACE INTO trades(id,
                                                 ticker,
                                                 open_date,
@@ -345,7 +345,7 @@ def compile_data(db, ticker, df):
                  0)
  
     if df['action'].iloc[-1] == 'sell':
-        print("ADDING SELL")
+        # print("ADDING SELL")
         sql = ''' UPDATE trades 
                   SET close_price = ?, close_date = ?  
                   WHERE ticker = ? AND close_price = 0  
@@ -377,6 +377,10 @@ tickers = pd.read_csv('tickers.csv')
 
 total_trades=0
 total_profits=0
+
+print("\n")
+print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
+print('=========================================================================================================================')
 for ticker in tickers:
     df = pd.read_csv('stock_data/{}.csv'.format(ticker))
     if df.empty:
@@ -385,15 +389,25 @@ for ticker in tickers:
     df = compile_data(conn, ticker, df)
     
     ticker_total_profits, trades_loss, trades_wins, losses, wins = backtest(ticker,df)
-    print('\n')
-    print('Ticker       : ' + ticker)
-    print('Total Trades : ' + str(trades_loss+trades_wins))
-    print('Total Profit : ' + str(round(ticker_total_profits,2)) + " %")
-    print('Trades Loss  : ' + str(trades_loss))
-    print('Trades Wins  : ' + str(trades_wins))
-    print('% Loss       : ' + str(round(losses,2)) + " %")
-    print('% Wins       : ' + str(round(wins,2)) + " %")
-    print('\n')
+    
+    print(str(ticker)+'\t|\t'+\
+          str(trades_loss+trades_wins)+'\t|\t'+\
+          str(trades_wins)+'\t|\t'+\
+          str(trades_loss)+'\t|\t'+\
+          str(round(wins,2))+'\t|\t'+\
+          str(round(losses,2))+'\t|\t'+\
+          str(round(ticker_total_profits,2))+'\t\t|'        
+    )
+    
+    #print('\n')
+    #print('Ticker       : ' + ticker)
+    #print('Total Trades : ' + str(trades_loss+trades_wins))
+    #print('Total Profit : ' + str(round(ticker_total_profits,2)) + " %")
+    #print('Trades Loss  : ' + str(trades_loss))
+    #print('Trades Wins  : ' + str(trades_wins))
+    #print('% Loss       : ' + str(round(losses,2)) + " %")
+    #print('% Wins       : ' + str(round(wins,2)) + " %")
+    #print('\n')
     
     total_trades = total_trades + trades_loss + trades_wins
     total_profits = total_profits + ticker_total_profits
