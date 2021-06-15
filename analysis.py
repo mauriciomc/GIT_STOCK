@@ -5,10 +5,12 @@ from matplotlib.widgets import MultiCursor
 from matplotlib.widgets import Cursor
 import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
-from mpl_finance import candlestick_ohlc
+from mplfinance.original_flavor import candlestick_ohlc
 import matplotlib.dates as dates
 import pandas as pd
 import pandas_datareader.data as web
+
+import sys, getopt
 
 years     = mdates.YearLocator()
 months    = mdates.MonthLocator()
@@ -22,7 +24,7 @@ style.use("ggplot")
 
 def plot_ticker_analysis(market, ticker):
 
-    ticker_file = 'stock_'+market+'_dfs/'+ticker+'.csv'
+    ticker_file = 'stock_data/'+ticker+'.csv'
     df = pd.read_csv(ticker_file, parse_dates=True, index_col=0)
     df_rsi = df.copy()
 
@@ -119,5 +121,21 @@ def plot_ticker_analysis(market, ticker):
     plt.show()
 
 
-plot_ticker_analysis('bovespa','CSMG3.SA')
+def main(argv):
+   try:
+      opts, args = getopt.getopt(argv,"ht:",["ticker="])
+   except getopt.GetoptError:
+      print('analysis.py -t <ticker_name>')
+      sys.exit(2)
+   for opt, arg in opts:
+      if opt == '-h':
+         print('analysis.py -t <ticker_name>')
+         sys.exit()
+      elif opt in ("-t", "--ticker"):
+         ticker = arg
+         plot_ticker_analysis('lse',ticker)
+           
+if __name__ == "__main__":
+   main(sys.argv[1:])
+
 

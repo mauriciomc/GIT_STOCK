@@ -199,7 +199,7 @@ def strategy_ichi(dataframe):
     dataframe['senkou_b'] = ha_ichi['senkou_span_b']
     dataframe['cloud_green'] = ha_ichi['cloud_green']
     dataframe['cloud_red'] = ha_ichi['cloud_red']
-    dataframe['chikou'] = dataframe['ha_close'].shift(26)
+    dataframe['chikou'] = dataframe['ha_close'].shift(-26)
 
     
     """
