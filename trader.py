@@ -97,6 +97,9 @@ def get_data_from_yahoo(reload_tickers=True):
     if not os.path.exists('stock_data'):
         os.makedirs('stock_data')
     
+    if reload_tickers == False:
+        return 0
+    
     tickers = pd.read_csv('tickers.csv')
     end = dt.date.today() #- dt.timedelta(days=5)
     start = end - dt.timedelta(days=400)
@@ -297,6 +300,60 @@ def strategy(df):
         'sell'] = 1 
     ####### STRATEGY END ########
     return df
+
+# Strategy ichimoku heiken version 2
+def strategy_ichi_v2(df):
+    #Heiken Ashi Candlestick Data
+    heikinashi = qtpylib.heikinashi(df)        
+
+    ha_ichi = ichimoku( heikinashi,
+                        conversion_line_period=9, 
+                        base_line_periods=26,
+                        laggin_span=52, 
+                        displacement=26
+    )
+    df['ha_open'] = heikinashi['open']
+    df['ha_close'] = heikinashi['close']  
+    df['ha_high'] = heikinashi['high'] 
+    df['ha_low'] = heikinashi['low'] 
+    
+    df['tenkan'] = ha_ichi['tenkan_sen']
+    df['kijun'] = ha_ichi['kijun_sen']
+    df['senkou_a'] = ha_ichi['senkou_span_a']
+    df['senkou_b'] = ha_ichi['senkou_span_b']
+    df['cloud_green'] = ha_ichi['cloud_green']
+    df['cloud_red'] = ha_ichi['cloud_red']
+    df['chikou'] = ha_ichi['chikou_span']
+   
+    df.loc[
+    (
+        (
+            (df['ha_close'].crossed_above(df['senkou_a'])) &
+            (df['ha_close'].shift(1) > df['senkou_a']) &
+            (df['ha_close'].shift(1) > df['senkou_b']) 
+        )
+        |
+        (
+            (df['ha_close'].crossed_above(df['senkou_b'])) &
+            (df['ha_close'].shift(1) > df['senkou_a']) &
+            (df['ha_close'].shift(1) > df['senkou_b']) 
+        )
+        |
+        (
+            (df['senkou_a'].crossed_above(df['senkou_b']))
+        )
+     ),
+       'buy'] = 1
+
+    df.loc[
+    (
+        ((qtpylib.crossed_below(df['tenkan'], df['kijun'])) &
+        (qtpylib.crossed_below(df['tenkan'].shift(1), df['kijun']).shift(1))) |
+        (df['chikou'].crossed_below(df['tenkan']))
+    ),
+      'sell'] = 1
+
+    return df
  
 def disambiguity(df):
     # Replace NaN values with 0 
@@ -333,7 +390,10 @@ def compile_data(db, ticker, df):
     # df = strategy_ema_cross(df)
  
     # Ichimoku on heiken ashi cloud
-    df = strategy_ichi(df)
+    # df = strategy_ichi(df)
+    
+    # Ichimoku on heiken ashi v2
+    df = strategy_ichi_v2(df)
     
     ### Fix buy and sell on the same candle ###
     df = disambiguity(df)
