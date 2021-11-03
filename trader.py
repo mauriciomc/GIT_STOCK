@@ -70,7 +70,7 @@ def show_open_trades(conn):
     for row in rows:
         print(row)       
         
-    return
+    return rows
 
 def show_closed_trades(conn):
     sql = ''' SELECT id, ticker, open_date, open_price, close_date, close_price from trades 
@@ -85,7 +85,7 @@ def show_closed_trades(conn):
     for row in rows:
         print(row)       
         
-    return
+    return rows
 
 def get_rocp(first, second):
     if first > 0:
@@ -372,7 +372,7 @@ def disambiguity(df):
          
     return df
 
-def compile_data(db, ticker, df):
+def compile_data(conn, ticker, df):
     ## Prepare dataframe to be workable with talib
     df.reindex(columns=["Close","Adj Close"])
     df.drop(['Close'],1,inplace=True)
@@ -441,66 +441,71 @@ def compile_data(db, ticker, df):
     #df.columns = [''] * len(df.columns)
     #print(str(ticker+" "+df.iloc[-1:,-1:]))
         
+def main():
+    get_data_from_yahoo()
+    conn = create_connection("trades.db")
+    create_table(conn,sql_create_table)
+    
+    ### Get tickers ###
+    tickers = pd.read_csv('tickers.csv')
+    
+    total_trades_wins=0
+    total_trades_loss=0
+    total_profits=0
+    total_wins=0
+    total_loss=0
+    wallet=[]
+    
+    print("\n")
+    print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
+    print('=========================================================================================================================')
+    for ticker in tickers:
+        df = pd.read_csv('stock_data/{}.csv'.format(ticker))
+        if df.empty:
+            continue
+        
+        df = compile_data(conn, ticker, df)
+        
+        ticker_total_profits, trades_loss, trades_wins, losses, wins = backtest(ticker,df)
+        
+        print(str(ticker)+'\t|\t'+\
+              str(trades_loss+trades_wins)+'\t|\t'+\
+              str(trades_wins)+'\t|\t'+\
+              str(trades_loss)+'\t|\t'+\
+              str(round(wins,2))+'\t|\t'+\
+              str(round(losses,2))+'\t|\t'+\
+              str(round(ticker_total_profits,2))+'\t\t|'        
+        )
+        
+        total_profits = total_profits + ticker_total_profits
+        total_wins = total_wins + wins 
+        total_loss = total_loss + losses
+        total_trades_wins = total_trades_wins + trades_wins
+        total_trades_loss = total_trades_loss + trades_loss
+    
+    print("================================================================================================================|")    
+    print('\t| Total Trades\t|  Total # Wins\t|  Total # Loss\t|  Total Wins %\t|  Total Loss %\t|  Total Profit %\t|  ')
+    print("----------------------------------------------------------------------------------------------------------------|")    
+    print("Total"+'\t|\t'+\
+          str(total_trades_loss+total_trades_wins)+'\t|\t'+\
+          str(total_trades_wins)+'\t|\t'+\
+          str(total_trades_loss)+'\t|\t'+\
+          str(round(total_wins,2))+'\t|\t'+\
+          str(round(total_loss,2))+'\t|\t'+\
+          str(round(total_profits,2))+'\t\t|'        
+        )
+    print("================================================================================================================|")    
+    print("")
+    print("#################################################################################################################")
+    print("###############       Open Trades      ##########################################################################")
+    print("ID - Ticker --- Open Date -- Open ")
+    opened = show_open_trades(conn)
+    print("#################################################################################################################")
+    print("###############      Closed Trades     ##########################################################################")
+    print("ID -- Ticker --- Open Date -- Open -- Close Date -- Close ")
+    closed = show_closed_trades(conn)
+    return opened,closed
            
-#### MAIN ####           
-get_data_from_yahoo()
-conn = create_connection("trades.db")
-create_table(conn,sql_create_table)
-
-### Get tickers ###
-tickers = pd.read_csv('tickers.csv')
-
-total_trades_wins=0
-total_trades_loss=0
-total_profits=0
-total_wins=0
-total_loss=0
-
-print("\n")
-print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
-print('=========================================================================================================================')
-for ticker in tickers:
-    df = pd.read_csv('stock_data/{}.csv'.format(ticker))
-    if df.empty:
-        continue
-    
-    df = compile_data(conn, ticker, df)
-    
-    ticker_total_profits, trades_loss, trades_wins, losses, wins = backtest(ticker,df)
-    
-    print(str(ticker)+'\t|\t'+\
-          str(trades_loss+trades_wins)+'\t|\t'+\
-          str(trades_wins)+'\t|\t'+\
-          str(trades_loss)+'\t|\t'+\
-          str(round(wins,2))+'\t|\t'+\
-          str(round(losses,2))+'\t|\t'+\
-          str(round(ticker_total_profits,2))+'\t\t|'        
-    )
-    
-    total_profits = total_profits + ticker_total_profits
-    total_wins = total_wins + wins 
-    total_loss = total_loss + losses
-    total_trades_wins = total_trades_wins + trades_wins
-    total_trades_loss = total_trades_loss + trades_loss
-
-print("================================================================================================================|")    
-print('\t| Total Trades\t|  Total # Wins\t|  Total # Loss\t|  Total Wins %\t|  Total Loss %\t|  Total Profit %\t|  ')
-print("----------------------------------------------------------------------------------------------------------------|")    
-print("Total"+'\t|\t'+\
-      str(total_trades_loss+total_trades_wins)+'\t|\t'+\
-      str(total_trades_wins)+'\t|\t'+\
-      str(total_trades_loss)+'\t|\t'+\
-      str(round(total_wins,2))+'\t|\t'+\
-      str(round(total_loss,2))+'\t|\t'+\
-      str(round(total_profits,2))+'\t\t|'        
-    )
-print("================================================================================================================|")    
-print("")
-print("#################################################################################################################")
-print("###############       Open Trades      ##########################################################################")
-print("ID - Ticker --- Open Date -- Open ")
-show_open_trades(conn)
-print("#################################################################################################################")
-print("###############      Closed Trades     ##########################################################################")
-print("ID -- Ticker --- Open Date -- Open -- Close Date -- Close ")
-show_closed_trades(conn)
+#### MAIN #### 
+if __name__ == '__main__':
+    main()          

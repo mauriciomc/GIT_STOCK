@@ -1,2 +1,4 @@
 *.db
 stock_data/
+*.lock
+__pycache__
