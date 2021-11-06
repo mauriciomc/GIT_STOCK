@@ -101,7 +101,7 @@ def get_data_from_yahoo(reload_tickers=True):
         return 0
     
     tickers = pd.read_csv('tickers.csv')
-    end = dt.date.today() #- dt.timedelta(days=5)
+    end = dt.date.today() #- dt.timedelta(days=12)
     start = end - dt.timedelta(days=400)
     
     for ticker in tickers:
@@ -114,13 +114,14 @@ def get_data_from_yahoo(reload_tickers=True):
             if df.empty:
                 continue
             print(ticker)
-            new_date = dt.datetime.strptime(df['Date'].iloc[-1], '%Y-%m-%d').date()
+            new_date = dt.datetime.strptime(df['Date'].iloc[-1],'%Y-%m-%d').date()
             if new_date < end:
-                new_df = yf.download(ticker,group_by=ticker,start=new_date, end=end)
-                df.append(new_df)
-                df = df.drop_duplicates(subset='Date', keep="first")
-                df = df.sort_values(by='Date')
-                df.to_csv('stock_data/{}.csv'.format(ticker), index=False)
+                new_df = yf.download(ticker,group_by=ticker,start=new_date,end=end) 
+                df = df.set_index('Date')
+                df = df.append(new_df)
+                df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d')
+                df = df[~df.index.duplicated(keep='last')]
+                df.to_csv('stock_data/{}.csv'.format(ticker))
             
 def backtest(ticker, df):
     #print("Backtesting "+ticker)
