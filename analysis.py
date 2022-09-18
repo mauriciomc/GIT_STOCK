@@ -9,6 +9,7 @@ from mplfinance.original_flavor import candlestick_ohlc
 import matplotlib.dates as dates
 import pandas as pd
 import pandas_datareader.data as web
+import numpy as np
 
 import sys, getopt
 
@@ -25,12 +26,14 @@ style.use("ggplot")
 def plot_ticker_analysis(market, ticker):
 
     ticker_file = 'stock_data/'+ticker+'.csv'
+    ticker_analysis_file = 'stock_data/'+ticker+'_analyzed.csv'
     df = pd.read_csv(ticker_file, parse_dates=True, index_col=0)
+    df_analysis = pd.read_csv(ticker_analysis_file, parse_dates=True, index_col=0)
     df_rsi = df.copy()
 
     #df['100ma'] = df['Adj Close'].rolling(window=100, min_periods=0).mean()
 
-    df_ohlc   = df['Adj Close'].resample('2D').ohlc()
+    df_ohlc   = df['Adj Close'].resample('1D').ohlc()
     df_volume = df['Volume'] #.resample('2D').sum()
 
     #df_vol_mean = df['Volume'].mean()
@@ -97,6 +100,15 @@ def plot_ticker_analysis(market, ticker):
     ax1.plot(upper, label = 'upper', color = 'black', lw=0.3)
     ax1.plot(lower, label = 'lower', color = 'black', lw=0.3)
     ax1.plot(mma_30, label = 'mma', color = 'black' , lw=0.3)
+    
+    # Plot buys
+    df_buys=df_analysis['buy']*df_analysis['close']
+    df_buys.replace(0, np.nan, inplace=True)
+    ax1.plot(df_buys, label = 'buy', color = 'green', marker='o')
+    # Plot sells
+    df_sells=df_analysis['sell']*df_analysis['close']
+    df_sells.replace(0, np.nan, inplace=True)
+    ax1.plot(df_sells, label = 'sell', color = 'red', marker='o')
     
     ## Plot candlestick
     candlestick_ohlc(ax1, df_ohlc.values, width=2, colorup='g')

@@ -22,10 +22,14 @@ class telegram_bot():
     def analyze(self, update, context):
         update.message.reply_text("Analyzing...")
         self.opened_trades,self.closed_trades=trader.main()
+# TODO: Colocar em forma de link ou grafico baseado em algum site
+#        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
         
     def opened(self, update, context):
         result=str((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple')))
+# TODO: Colocar em forma de link ou grafico baseado em algum site
+        #context.bot.send_message(chat_id=update.effective_chat.id, text=result)
         update.message.reply_text(result)
     
     def closed(self, update, context):

@@ -15,7 +15,8 @@ import pyEX as p
 
 # Use technical analysis libraries 
 import talib.abstract as ta
-import freqtrade.vendor.qtpylib.indicators as qtpylib
+#import freqtrade.vendor.qtpylib.indicators as qtpylib
+import qtpylib as qt
 
 # Add ichimoku indicator
 from technical.indicators import ichimoku
@@ -33,6 +34,14 @@ sql_create_table = """ CREATE TABLE IF NOT EXISTS trades (
                                                             open_price float NOT NULL,
                                                             close_price float NOT NULL
                                                  ); """
+
+def heikinashi(df):
+    df_ha = df.copy()
+    for i in range(df_ha.shape[0]):
+      if i > 0:
+        df_ha.loc[df_ha.index[i],'Open'] = (df['Open'][i-1] + df['Close'][i-1])/2
+  
+        df_ha.loc[df_ha.index[i],'Close'] = (df['Open'][i] + df['Close'][i] + df['Low'][i] +  df['High'][i])/4
 
 def create_connection(db_file):
     """ create a database connection to a SQLite database """
@@ -102,26 +111,35 @@ def get_data_from_yahoo(reload_tickers=True):
     
     tickers = pd.read_csv('tickers.csv')
     end = dt.date.today() #- dt.timedelta(days=12)
-    start = end - dt.timedelta(days=400)
+    start = end - dt.timedelta(days=2000)
     
     for ticker in tickers:
         ticker = ticker
-        if not os.path.exists('stock_data/{}.csv'.format(ticker)):
-            df = yf.download(ticker,group_by=ticker,start=start,end=end)
-            df.to_csv('stock_data/{}.csv'.format(ticker))
-        else:
-            df = pd.read_csv('stock_data/{}.csv'.format(ticker))
-            if df.empty:
-                continue
-            print(ticker)
-            new_date = dt.datetime.strptime(df['Date'].iloc[-1],'%Y-%m-%d').date()
-            if new_date < end:
-                new_df = yf.download(ticker,group_by=ticker,start=new_date,end=end) 
-                df = df.set_index('Date')
-                df = df.append(new_df)
-                df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d')
-                df = df[~df.index.duplicated(keep='last')]
-                df.to_csv('stock_data/{}.csv'.format(ticker))
+        try:
+            if not os.path.exists('stock_data/{}.csv'.format(ticker)):
+                try:
+                    df = yf.download(ticker,group_by=ticker,start=start,end=end, threads=False)
+                    df.to_csv('stock_data/{}.csv'.format(ticker))
+                except:
+                    continue
+            else:
+                df = pd.read_csv('stock_data/{}.csv'.format(ticker), index_col=False)
+                if df.empty:
+                    continue
+                print(ticker)
+                new_date = dt.datetime.strptime(df['Date'].iloc[-1],'%Y-%m-%d').date()
+                if new_date < end:
+                    try:
+                        new_df = yf.download(ticker, group_by=ticker, start=new_date, end=end, threads=False) 
+                    except:
+                        continue
+                    df = df.set_index('Date')
+                    df = df.append(new_df)
+                    df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d')
+                    #df = df[df.index.duplicated(keep='last')]
+                    df.to_csv('stock_data/{}.csv'.format(ticker))
+        except:
+            continue            
             
 def backtest(ticker, df):
     #print("Backtesting "+ticker)
@@ -162,6 +180,35 @@ def backtest(ticker, df):
             
     return total_profit, trades_loss, trades_wins, losses, wins  
 
+def strategy_cleci(df):
+    #print(" -- Strategy Cleci -- \n")
+    #df['highest_low'] = df['low'].rolling(window=200).max()
+    #df['lowest_low']  = df['low'].rolling(window=200).min() 
+    highest_low = 0
+    lowest_low = 0
+    for index, row in df.iterrows():
+        if (row['low'] < lowest_low) or (lowest_low == 0):
+            lowest_low = row['low']
+        if (row['low'] > highest_low) or (highest_low == 0):
+            highest_low = row['low']    
+        df.loc[(row['Date'] == df['Date']), 'lowest_low'] = lowest_low
+        df.loc[(row['Date'] == df['Date']), 'highest_low'] = highest_low    
+    # Populate Buy signals
+    df.loc[
+        (
+            ( df['close'].crossed_below(df['lowest_low'] * 1.1) )
+        ),
+        'buy'] = 1
+    
+    # Populate Sell signals
+    df.loc[
+        (
+            df['close'].crossed_above(df['highest_low'] * 0.9)
+        ),
+        'sell'] = 1
+
+    return df
+
 def strategy_ema_cross(df):
     # Exponential Moving Averages
     df['ema12']  = ta.EMA(df['close'],12)
@@ -198,7 +245,7 @@ def strategy_ema_cross(df):
 ## Ichimoku Heiken aishi cloud
 def strategy_ichi(dataframe):
 #Heiken Ashi Candlestick Data
-    heikinashi = qtpylib.heikinashi(dataframe)        
+    heikinashi = ta.heikinashi(dataframe)        
 
     dataframe['ha_open'] = heikinashi['open']
     dataframe['ha_close'] = heikinashi['close']  
@@ -267,7 +314,7 @@ def strategy(df):
     df['rsi'] = ta.RSI(df,14)
  
     # Compute BB
-    bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(df), window=21, stds=2)
+    bollinger = qt.bollinger_bands(qt.typical_price(df), window=21, stds=2)
     df['upper'] = bollinger['upper']
     df['mid']   = bollinger['mid']
     df['lower'] = bollinger['lower']
@@ -284,7 +331,7 @@ def strategy(df):
     # Populate Buy signals
     df.loc[ 
         ( 
-            ( qtpylib.crossed_above(df['macd'], df['macdsignal']) ) &
+            ( df['macd'].crossed_above(df['macdsignal']) ) &
             ( df['close'] >= df['tema'] * 0.5 ) &
             ( df['macd'] >= 0 ) &
             ( df['volume'] > 0 ) 
@@ -294,7 +341,7 @@ def strategy(df):
     # Populate Sell Signals
     df.loc[
         (
-            ( qtpylib.crossed_below(df['macd'], df['macdsignal']) ) &
+            ( df['macd'].crossed_below(df['macdsignal']) ) &
             ( df['close'] <= df['tema'] * 1.05 ) &
             ( df['volume'] > 0 ) 
         ),
@@ -305,7 +352,7 @@ def strategy(df):
 # Strategy ichimoku heiken version 2
 def strategy_ichi_v2(df):
     #Heiken Ashi Candlestick Data
-    heikinashi = qtpylib.heikinashi(df)        
+    heikinashi = qt.indicators.heikinashi(df)        
 
     ha_ichi = ichimoku( heikinashi,
                         conversion_line_period=9, 
@@ -348,8 +395,8 @@ def strategy_ichi_v2(df):
 
     df.loc[
     (
-        ((qtpylib.crossed_below(df['tenkan'], df['kijun'])) &
-        (qtpylib.crossed_below(df['tenkan'].shift(1), df['kijun']).shift(1))) |
+        (df['tenkan'].crossed_below(df['kijun'])) &
+        (df['tenkan'].shift(1).crossed_below(df['kijun']).shift(1)) |
         (df['chikou'].crossed_below(df['tenkan']))
     ),
       'sell'] = 1
@@ -364,9 +411,9 @@ def disambiguity(df):
     # Disambiguation: Sell and Buy signals don't go together.
     if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1] > 0:
         df['action'] = 'hold'
-    elif (df['buy'].iloc[-1]):
+    elif (df['buy'].iloc[-1] > 0):
         df['action'] = 'buy'
-    elif (df['sell'].iloc[-1]):
+    elif (df['sell'].iloc[-1] > 0):
         df['action'] = 'sell'
     else:
         df['action'] = 'hold'
@@ -394,7 +441,9 @@ def compile_data(conn, ticker, df):
     # df = strategy_ichi(df)
     
     # Ichimoku on heiken ashi v2
-    df = strategy_ichi_v2(df)
+    # df = strategy_ichi_v2(df)
+    
+    df = strategy_cleci(df)
     
     ### Fix buy and sell on the same candle ###
     df = disambiguity(df)
@@ -455,7 +504,8 @@ def main():
     total_profits=0
     total_wins=0
     total_loss=0
-    wallet=[]
+    # Initial wallet money
+    wallet=10000
     
     print("\n")
     print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
@@ -483,7 +533,12 @@ def main():
         total_loss = total_loss + losses
         total_trades_wins = total_trades_wins + trades_wins
         total_trades_loss = total_trades_loss + trades_loss
-    
+        
+        save_df = True
+        if save_df:
+            df = df.set_index('Date')
+            df.to_csv('stock_data/{}_analyzed.csv'.format(ticker))
+
     print("================================================================================================================|")    
     print('\t| Total Trades\t|  Total # Wins\t|  Total # Loss\t|  Total Wins %\t|  Total Loss %\t|  Total Profit %\t|  ')
     print("----------------------------------------------------------------------------------------------------------------|")    
