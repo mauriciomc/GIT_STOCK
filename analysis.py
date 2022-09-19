@@ -24,9 +24,14 @@ day_fmt   = mdates.DateFormatter('%d')
 style.use("ggplot")
 
 def plot_ticker_analysis(market, ticker):
-
+    """ Plot the ticker
+    :param market: Not used
+    :param ticker: Ticker name
+    """
+    # Output files TODO move stock_data to a parameter
     ticker_file = 'stock_data/'+ticker+'.csv'
     ticker_analysis_file = 'stock_data/'+ticker+'_analyzed.csv'
+
     df = pd.read_csv(ticker_file, parse_dates=True, index_col=0)
     df_analysis = pd.read_csv(ticker_analysis_file, parse_dates=True, index_col=0)
     df_rsi = df.copy()
@@ -80,7 +85,6 @@ def plot_ticker_analysis(market, ticker):
     exp3 = macd.ewm(span=9, adjust=False).mean()
     ## *******************************************
 
-
     ## Graph organization ***********************
     #ax1 = plt.subplot2grid((10,1),(0,0), rowspan=4, colspan=1 )
     #ax2 = plt.subplot2grid((10,1),(4,0), rowspan=3, colspan=1 )
@@ -132,7 +136,6 @@ def plot_ticker_analysis(market, ticker):
 
     plt.show()
 
-
 def main(argv):
    try:
       opts, args = getopt.getopt(argv,"ht:",["ticker="])
@@ -149,5 +152,3 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
-
-

@@ -7,20 +7,26 @@ from sklearn import svm, neighbors
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 
-
-def process_data_for_labels(ticker):
-    hm_days = 7
-    df = pd.read_csv('bovespa_joined_closes.csv',index_col = 0)
+def process_data_for_labels(ticker,
+    csv_filename = 'bovespa_joined_closes.csv',
+    hm_days = 7):
+    """ Acquire the tickets from the CSV
+        :param ticker: initial dataframe (today just overwrite)
+        :param csv_filename: CSV from whom the tickets names are retrieved
+        :param hm_days: Number of days to extract
+    """
+    df = pd.read_csv(csv_filename, index_col = 0)
     tickers = df.columns.values.tolist()
-    df.fillna(0,inplace=True)
+    df.fillna(0, inplace=True)
 
-    for i in range(1, hm_days+1):
+    for i in range(1, hm_days + 1):
         df['{}_{}d'.format(ticker, i)] = (df[ticker].shift(-i) - df[ticker]/ df[ticker])
 
-    df.fillna(0,inplace=True)
+    df.fillna(0, inplace=True)
     return tickers, df
 
 def buy_sell_hold(*args):
+    """ Transaction decision (Needs overhaul) """
     cols = [c for c in args]
     requirement = 0.02
     for col in cols:
@@ -63,11 +69,12 @@ def extract_featuresets(ticker):
 
 
 def do_ml(ticker):
+    """ Apply the main ML training and decision algorithm """
     X, y, df = extract_featuresets(ticker)
 
     X_train, X_test, y_train, y_test = train_test_split(X,
                                                         y,
-                                                        test_size=0.25)
+                                                        test_size = 0.25)
 
     clf = VotingClassifier([('lsvc', svm.LinearSVC()                 ),
                             ('knn' , neighbors.KNeighborsClassifier()),
@@ -75,6 +82,7 @@ def do_ml(ticker):
 
     clf.fit(X_train, y_train)
     confidence = clf.score(X_test, y_test)
+
     print('Accuracy',confidence)
     predictions = clf.predict(X_test)
     print('Predicted spread:', Counter(predictions))
@@ -82,8 +90,5 @@ def do_ml(ticker):
     return confidence
 
 do_ml('CMIG3.SA')
-
-
-
 
 #buy_sell_hold()
