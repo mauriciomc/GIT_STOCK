@@ -37,22 +37,22 @@ def plot_ticker_analysis(market, ticker):
     df_volume = df['Volume'] #.resample('2D').sum()
 
     #df_vol_mean = df['Volume'].mean()
-    
+
     #print(df_vol_mean)
 
     df_ohlc.reset_index(inplace=True)
     df_ohlc['Date'] = df_ohlc['Date'].map(dates.date2num)
-    
+
     df.drop(['Open','High','Low','Close','Volume'],1,inplace=True)
 
     ## Bollinger Computation *********************
     mma_30 = df.rolling(window=20).mean()
     std_30 = df.rolling(window=20).std()
-        
+
     upper  = mma_30 + (std_30 * 2)
     lower  = mma_30 - (std_30 * 2)
     ## *******************************************
-    
+
     ## RSI Computation ***************************
     close = df['Adj Close']
     delta = close.diff()
@@ -62,13 +62,13 @@ def plot_ticker_analysis(market, ticker):
     down [down > 0] = 0
     #roll_up1 = pd.DataFrame.ewm(  up, 14)
     #roll_dn1 = pd.DataFrame.ewm(down, 14)
-    
+
     #RS1  = roll_up1 / roll_dn1
     #RSI1 = 100.0 - (100.0 / (1.0 + RS1))
-    
+
     roll_up2 = up.rolling(window=14).mean().abs()
     roll_dn2 = down.rolling(window=14).mean().abs()
-    
+
     RS2  = roll_up2 / roll_dn2
     RSI2 = 100.0 - (100.0 / (1.0 + RS2))
     ## *******************************************
@@ -86,13 +86,13 @@ def plot_ticker_analysis(market, ticker):
     #ax2 = plt.subplot2grid((10,1),(4,0), rowspan=3, colspan=1 )
     #ax3 = plt.subplot2grid((10,1),(7,0), rowspan=1, colspan=1 )
     #ax4 = plt.subplot2grid((10,1),(8,0), rowspan=2, colspan=1 )
-    
+
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
 
     #ax3.xaxis_date()
-    
-    ax3.xaxis.set_major_formatter(day_fmt)   
-    ax3.xaxis.set_minor_formatter(day_fmt)   
+
+    ax3.xaxis.set_major_formatter(day_fmt)
+    ax3.xaxis.set_minor_formatter(day_fmt)
 
     ## Plot ADJ CLOSE
     ax1.plot(df['Adj Close'], label = 'Adj Close', color = 'blue')
@@ -100,7 +100,7 @@ def plot_ticker_analysis(market, ticker):
     ax1.plot(upper, label = 'upper', color = 'black', lw=0.3)
     ax1.plot(lower, label = 'lower', color = 'black', lw=0.3)
     ax1.plot(mma_30, label = 'mma', color = 'black' , lw=0.3)
-    
+
     # Plot buys
     df_buys=df_analysis['buy']*df_analysis['close']
     df_buys.replace(0, np.nan, inplace=True)
@@ -109,7 +109,7 @@ def plot_ticker_analysis(market, ticker):
     df_sells=df_analysis['sell']*df_analysis['close']
     df_sells.replace(0, np.nan, inplace=True)
     ax1.plot(df_sells, label = 'sell', color = 'red', marker='o')
-    
+
     ## Plot candlestick
     candlestick_ohlc(ax1, df_ohlc.values, width=2, colorup='g')
     #ax3.plot(df_volume)
@@ -123,13 +123,13 @@ def plot_ticker_analysis(market, ticker):
     ax2.plot(exp3, label='Signal', color = 'red' )
     #plt.setp(ax1.get_xticklabels(), visible=False)
     #plt.setp(ax2.get_xticklabels(), visible=False)
-    
+
     multi = MultiCursor(fig.canvas, (ax1, ax2, ax3, ax4), color = 'r', lw=1)
     cursor1 = Cursor(ax1, useblit=True, color='red', linewidth=2 )
     cursor2 = Cursor(ax2, useblit=True, color='red', linewidth=2 )
     cursor3 = Cursor(ax3, useblit=True, color='red', linewidth=2 )
     cursor4 = Cursor(ax4, useblit=True, color='red', linewidth=2 )
- 
+
     plt.show()
 
 
@@ -146,7 +146,7 @@ def main(argv):
       elif opt in ("-t", "--ticker"):
          ticker = arg
          plot_ticker_analysis('lse',ticker)
-           
+
 if __name__ == "__main__":
    main(sys.argv[1:])
 

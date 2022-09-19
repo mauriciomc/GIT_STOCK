@@ -25,15 +25,15 @@ class telegram_bot():
 # TODO: Colocar em forma de link ou grafico baseado em algum site
 #        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
-        
+
     def opened(self, update, context):
         result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
         update.message.reply_text(result, parse_mode='HTML')
-    
+
     def closed(self, update, context):
         result=str((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
         update.message.reply_text(result, parse_mode='HTML')
-        
+
     def help(self, update, context):
         update.message.reply_text("Available options \n/start    : start trader\n/open    : show open trades\n/closed  : show closed trades\n/analyze : Open or close trades based on the analysis")
 
@@ -70,7 +70,7 @@ class telegram_bot():
 
         # Start the Bot
         updater.start_polling()
-    
+
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
