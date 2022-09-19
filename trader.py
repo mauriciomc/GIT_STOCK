@@ -560,6 +560,12 @@ def main():
     print("###############      Closed Trades     ##########################################################################")
     print("ID -- Ticker --- Open Date -- Open -- Close Date -- Close ")
     closed = show_closed_trades(conn)
+    opened = pd.DataFrame(opened,columns=["ID","Ticker","Date","Open"])
+    opened.set_index('ID', inplace=True)
+    opened["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+opened["Ticker"]+"'>"+opened["Ticker"]+"</a>"
+    closed = pd.DataFrame(opened,columns=["ID","Ticker","Open Date","Open","Closed Date","Close"])
+    closed.set_index('ID', inplace=True)
+    closed["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["Ticker"]+"'>"+closed["Ticker"]+"</a>"
     return opened,closed
            
 #### MAIN #### 
