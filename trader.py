@@ -1,31 +1,4 @@
-import bs4 as bs
-import datetime as dt
-import matplotlib.pyplot as plt
-from matplotlib import style
-import numpy as np
-import os
-import pandas as pd
-import pandas_datareader.data as web
-import pickle
-import requests
-
-#import fix_yahoo_finance as yf
-import yfinance as yf
-
-import pyEX as p
-
-# Use technical analysis libraries
-import talib.abstract as ta
-#import freqtrade.vendor.qtpylib.indicators as qtpylib
-import qtpylib as qt
-
-# Add ichimoku indicator
-from technical.indicators import ichimoku
-
-style.use('ggplot')
-
-import sqlite3
-from sqlite3 import Error
+from includes import *
 
 sql_create_table = """ CREATE TABLE IF NOT EXISTS trades (
                                                             id integer PRIMARY KEY,
