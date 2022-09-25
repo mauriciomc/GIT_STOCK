@@ -1,6 +1,7 @@
+from email import message
 import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import trader as trader
+from trader import *
 from subprocess import run
 from tabulate import tabulate
 
@@ -21,7 +22,7 @@ class telegram_bot():
 
     def analyze(self, update, context):
         update.message.reply_text("Analyzing...")
-        self.opened_trades,self.closed_trades = trader.main()
+        self.opened_trades,self.closed_trades = self.trader.main()
         # TODO: Colocar em forma de link ou grafico baseado em algum site
         #        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
@@ -32,11 +33,24 @@ class telegram_bot():
         update.message.reply_text(result, parse_mode='HTML')
 
     def closed(self, update, context):
-        result=str((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+        result=str((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple', numalign="right")))
         update.message.reply_text(result, parse_mode='HTML')
 
+    def buy(self, update, context):
+        # Read two argument, validity will be check later
+        ticker = context.args[0]
+        value  = context.args[1]
+        update.message.reply_text("BUY now TICKER:{0} at the value of VALUE:{1}".format(str(ticker), str(value)))
+
     def help(self, update, context):
-        update.message.reply_text("Available options \n/start    : start trader\n/open    : show open trades\n/closed  : show closed trades\n/analyze : Open or close trades based on the analysis")
+        update.message.reply_text(
+            "Available options \n\
+            /start   : start trader\n\
+            /open    : show open trades\n\
+            /closed  : show closed trades\n\
+            /analyze : Open or close trades based on the analysis\n\
+            /buy TICKER VALUE : BUY now TICKER at the value of VALUE"
+            )
 
     def not_found(self, update, context):
         update.message.reply_text("Command not found")
@@ -46,8 +60,11 @@ class telegram_bot():
         logger.warning('Update "%s" caused error "%s"', self, update, context.error)
 
     def __init__(self):
+        """ Trader implementation"""
+        self.trader = trader()
+
         """Start the bot."""
-        self.opened_trades,self.closed_trades=trader.main()
+        self.opened_trades,self.closed_trades=self.trader.main()
         # Create the Updater and pass it your bot's token.
         # Make sure to set use_context=True to use the new context based callbacks
         # Post version 12 this will no longer be necessary
@@ -57,11 +74,12 @@ class telegram_bot():
         dp = updater.dispatcher
 
         # Custom commands
-        dp.add_handler(CommandHandler("start", self.start))
-        dp.add_handler(CommandHandler("help", self.help))
-        dp.add_handler(CommandHandler("open", self.opened))
-        dp.add_handler(CommandHandler("closed", self.closed))
-        dp.add_handler(CommandHandler("analyze", self.analyze))
+        dp.add_handler(CommandHandler("start",      self.start))
+        dp.add_handler(CommandHandler("help",       self.help))
+        dp.add_handler(CommandHandler("open",       self.opened))
+        dp.add_handler(CommandHandler("closed",     self.closed))
+        dp.add_handler(CommandHandler("analyze",    self.analyze))
+        dp.add_handler(CommandHandler("buy",        self.buy))
 
         # on noncommand i.e message - echo the message on Telegram
         dp.add_handler(MessageHandler(Filters.text, self.not_found))
@@ -77,6 +95,6 @@ class telegram_bot():
         # start_polling() is non-blocking and will stop the bot gracefully.
         updater.idle()
 
+# To run as an script
 if __name__ == '__main__':
-    tb=telegram_bot()
-
+    tb = telegram_bot()
