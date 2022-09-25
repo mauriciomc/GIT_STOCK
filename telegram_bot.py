@@ -21,12 +21,13 @@ class telegram_bot():
 
     def analyze(self, update, context):
         update.message.reply_text("Analyzing...")
-        self.opened_trades,self.closed_trades=trader.main()
-# TODO: Colocar em forma de link ou grafico baseado em algum site
-#        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
+        self.opened_trades,self.closed_trades = trader.main()
+        # TODO: Colocar em forma de link ou grafico baseado em algum site
+        #        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
 
     def opened(self, update, context):
+        """ Show Open Trades """
         result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
         update.message.reply_text(result, parse_mode='HTML')
 
@@ -75,7 +76,6 @@ class telegram_bot():
         # SIGTERM or SIGABRT. This should be used most of the time, since
         # start_polling() is non-blocking and will stop the bot gracefully.
         updater.idle()
-
 
 if __name__ == '__main__':
     tb=telegram_bot()

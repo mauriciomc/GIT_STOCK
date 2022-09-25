@@ -1,4 +1,6 @@
 """System basics"""
+from distutils.debug import DEBUG
+from logging import WARNING
 import os
 import datetime as dt
 import sys
@@ -23,7 +25,6 @@ import pandas as pd
 
 import pickle
 import requests
-from IPython import embed
 
 """ Financial & Metrics"""
 import yfinance as yf
@@ -36,3 +37,7 @@ from technical.indicators import ichimoku
 import matplotlib.pyplot as plt
 from matplotlib import style
 style.use('ggplot')
+
+""" Debug """
+from debug import *
+msg = Messages()

@@ -427,7 +427,7 @@ def compile_data(conn, ticker, df):
     trade = ""
 
     if df['action'].iloc[-1] == 'buy':
-        # print("ADDING BUY")
+        msg.print("ADDING BUY")
         sql = ''' INSERT OR REPLACE INTO trades(id,
                                                 ticker,
                                                 open_date,
@@ -445,7 +445,7 @@ def compile_data(conn, ticker, df):
                  0)
 
     if df['action'].iloc[-1] == 'sell':
-        # print("ADDING SELL")
+        msg.print("ADDING SELL")
         sql = ''' UPDATE trades
                   SET close_price = ?, close_date = ?
                   WHERE ticker = ? AND close_price = 0
@@ -456,6 +456,7 @@ def compile_data(conn, ticker, df):
                  ticker)
 
     if trade:
+        msg.print("Update SQL")
         cur = conn.cursor()
         cur.execute(sql, trade)
         conn.commit()
@@ -466,9 +467,12 @@ def compile_data(conn, ticker, df):
     #print(str(ticker+" "+df.iloc[-1:,-1:]))
 
 def main():
+    # Fetch yahoo data
     get_data_from_yahoo()
+
+    # Create SQL Table
     conn = create_connection("trades.db")
-    create_table(conn,sql_create_table)
+    create_table(conn, sql_create_table)
 
     ### Get tickers ###
     tickers = pd.read_csv('tickers.csv')
@@ -540,6 +544,7 @@ def main():
     closed = pd.DataFrame(opened,columns=["ID","Ticker","Open Date","Open","Closed Date","Close"])
     closed.set_index('ID', inplace=True)
     closed["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["Ticker"]+"'>"+closed["Ticker"]+"</a>"
+
     return opened,closed
 
 #### MAIN ####
