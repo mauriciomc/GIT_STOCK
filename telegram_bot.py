@@ -35,7 +35,7 @@ class telegram_bot():
             update.message.reply_text(result, parse_mode='HTML')
 
     def closed(self, update, context):
-        result=str((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+        result=((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
         if len(result) > 4096:
             for x in range(0, len(result), 4096):
                 update.message.reply_text(result[x:x+4096], parse_mode='HTML')
