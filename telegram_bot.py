@@ -27,19 +27,25 @@ class telegram_bot():
         update.message.reply_text("Finished")
 
     def opened(self, update, context):
-        result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
-        if len(result) > 4096:
-            for x in range(0, len(result), 4096):
-                update.message.reply_text(result[x:x+4096], parse_mode='HTML')
+        #result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
+        trades=self.opened_trades
+        if len(trades) > 100:
+            for x in range(0, len(trades), 100):
+                result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
+                update.message.reply_text(result, parse_mode='HTML')
         else:
+            result=((tabulate(trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
             update.message.reply_text(result, parse_mode='HTML')
 
     def closed(self, update, context):
-        result=((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
-        if len(result) > 4096:
-            for x in range(0, len(result), 4096):
-                update.message.reply_text(result[x:x+4096], parse_mode='HTML')
+        #result=((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+        trades=self.closed_trades
+        if len(trades) > 100:
+            for x in range(0, len(trades), 100):
+                result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+                update.message.reply_text(result, parse_mode='HTML')
         else:
+            result=((tabulate(trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
             update.message.reply_text(result, parse_mode='HTML')
 
     def help(self, update, context):
