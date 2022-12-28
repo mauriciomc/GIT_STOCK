@@ -8,6 +8,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import pickle
 import requests
+import exchange as exchange
 
 #import fix_yahoo_finance as yf
 import yfinance as yf
@@ -103,45 +104,6 @@ def get_rocp(first, second):
         rocp = ((second - first) / first) * 100
         return rocp
     return 0
-
-def get_data_from_yahoo(reload_tickers=True):
-    if not os.path.exists('stock_data'):
-        os.makedirs('stock_data')
-
-    if reload_tickers == False:
-        return 0
-
-    tickers = pd.read_csv('tickers.csv')
-    end = dt.date.today() #- dt.timedelta(days=12)
-    start = end - dt.timedelta(days=2000)
-
-    for ticker in tickers:
-        ticker = ticker
-        try:
-            if not os.path.exists('stock_data/{}.csv'.format(ticker)):
-                try:
-                    df = yf.download(ticker,group_by=ticker,start=start,end=end, threads=False)
-                    df.to_csv('stock_data/{}.csv'.format(ticker))
-                except:
-                    continue
-            else:
-                df = pd.read_csv('stock_data/{}.csv'.format(ticker), index_col=False)
-                if df.empty:
-                    continue
-                print(ticker)
-                new_date = dt.datetime.strptime(df['Date'].iloc[-1],'%Y-%m-%d').date()
-                if new_date < end:
-                    try:
-                        new_df = yf.download(ticker, group_by=ticker, start=new_date, end=end, threads=False)
-                    except:
-                        continue
-                    df = df.set_index('Date')
-                    df = df.append(new_df)
-                    df.index = pd.to_datetime(df.index).strftime('%Y-%m-%d')
-                    #df = df[df.index.duplicated(keep='last')]
-                    df.to_csv('stock_data/{}.csv'.format(ticker))
-        except:
-            continue
 
 def backtest(ticker, df):
     #print("Backtesting "+ticker)
@@ -493,7 +455,7 @@ def compile_data(conn, ticker, df):
     #print(str(ticker+" "+df.iloc[-1:,-1:]))
 
 def main():
-    get_data_from_yahoo()
+    exchange.get_data_from_yahoo(timeframe='1d')
     conn = create_connection("trades.db")
     create_table(conn,sql_create_table)
 

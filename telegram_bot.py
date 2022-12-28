@@ -28,11 +28,19 @@ class telegram_bot():
 
     def opened(self, update, context):
         result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
-        update.message.reply_text(result, parse_mode='HTML')
+        if len(result) > 4096:
+            for x in range(0, len(result), 4096):
+                update.message.reply_text(result[x:x+4096], parse_mode='HTML')
+        else:
+            update.message.reply_text(result, parse_mode='HTML')
 
     def closed(self, update, context):
         result=str((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
-        update.message.reply_text(result, parse_mode='HTML')
+        if len(result) > 4096:
+            for x in range(0, len(result), 4096):
+                update.message.reply_text(result[x:x+4096], parse_mode='HTML')
+        else:
+            update.message.reply_text(result, parse_mode='HTML')
 
     def help(self, update, context):
         update.message.reply_text("Available options \n/start    : start trader\n/open    : show open trades\n/closed  : show closed trades\n/analyze : Open or close trades based on the analysis")
@@ -49,8 +57,9 @@ class telegram_bot():
         self.opened_trades,self.closed_trades=trader.main()
         # Create the Updater and pass it your bot's token.
         # Make sure to set use_context=True to use the new context based callbacks
-        # Post version 12 this will no longer be necessary
+        # "Live" bot
         updater = Updater("2066971074:AAEbEEm6CH2KIDxsY8UVsqPMIH5BZT7Mwkg", use_context=True)
+        # Test bot updater = Updater("1668686740:AAEv9ydKGjd8JJaFv2EhOD5KmglRguJ2fZc", use_context=True)
 
         # Get the dispatcher to register handlers
         dp = updater.dispatcher
