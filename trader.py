@@ -71,7 +71,7 @@ def create_table(conn, create_table_sql):
 def show_open_trades(conn):
     sql = ''' SELECT id, ticker, open_date, open_price from trades
               WHERE close_price = 0
-              ORDER BY open_date
+              ORDER BY id, open_date
           '''
 
     cur = conn.cursor()
@@ -85,8 +85,8 @@ def show_open_trades(conn):
 
 def show_closed_trades(conn):
     sql = ''' SELECT id, ticker, open_date, open_price, close_date, close_price from trades
-              WHERE close_date != NULL
-              ORDER BY open_date, close_date
+              WHERE close_date != 0
+              ORDER BY id, open_date, close_date
           '''
 
     cur = conn.cursor()
@@ -526,7 +526,7 @@ def main():
     opened = pd.DataFrame(opened,columns=["ID","Ticker","Date","Open"])
     opened.set_index('ID', inplace=True)
     opened["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+opened["Ticker"]+"'>"+opened["Ticker"]+"</a>"
-    closed = pd.DataFrame(opened,columns=["ID","Ticker","Open Date","Open","Closed Date","Close"])
+    closed = pd.DataFrame(closed,columns=["ID","Ticker","Open Date","Open","Closed Date","Close"])
     closed.set_index('ID', inplace=True)
     closed["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["Ticker"]+"'>"+closed["Ticker"]+"</a>"
     return opened,closed
