@@ -3,6 +3,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import trader as trader
 from subprocess import run
 from tabulate import tabulate
+import time, threading
+from time import sleep
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -13,6 +15,13 @@ logger = logging.getLogger(__name__)
 class telegram_bot():
     opened_trades=[]
     closed_trades=[]
+
+    def trader_tick(self, updater):
+        updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
+        self.opened_trades,self.closed_trades=trader.main()
+        sleep(43200)
+        threading.Timer(43200.0, self.trader_tick(updater)).start()
+
 
     # Define a few command handlers. These usually take the two arguments update and
     # context. Error handlers also receive the raised TelegramError object in error.
@@ -60,7 +69,7 @@ class telegram_bot():
 
     def __init__(self):
         """Start the bot."""
-        self.opened_trades,self.closed_trades=trader.main()
+        # self.opened_trades,self.closed_trades=trader.main()
         # Create the Updater and pass it your bot's token.
         # Make sure to set use_context=True to use the new context based callbacks
         # "Live" bot
@@ -85,6 +94,8 @@ class telegram_bot():
 
         # Start the Bot
         updater.start_polling()
+
+        self.trader_tick(updater)
 
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
