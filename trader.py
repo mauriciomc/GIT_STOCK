@@ -9,22 +9,17 @@ import pandas_datareader.data as web
 import pickle
 import requests
 import exchange as exchange
-
 #import fix_yahoo_finance as yf
 import yfinance as yf
-
 import pyEX as p
-
 # Use technical analysis libraries
 import talib.abstract as ta
 #import freqtrade.vendor.qtpylib.indicators as qtpylib
 import qtpylib as qt
-
 # Add ichimoku indicator
 from technical.indicators import ichimoku
-
 style.use('ggplot')
-
+from typing import Iterable
 import sqlite3
 from sqlite3 import Error
 
@@ -36,6 +31,19 @@ sql_create_table = """ CREATE TABLE IF NOT EXISTS trades (
                                                             open_price float NOT NULL,
                                                             close_price float NOT NULL
                                                  ); """
+
+
+
+def get_values(d):
+    if isinstance(d, dict):
+        for v in d.values():
+            yield from get_values(v)
+    elif isinstance(d, Iterable) and not isinstance(d, str):
+        for v in d:
+            yield from get_values(v)
+    else:
+        yield d
+
 
 def heikinashi(df):
     df_ha = df.copy()
@@ -454,21 +462,17 @@ def compile_data(conn, ticker, df):
     #df.columns = [''] * len(df.columns)
     #print(str(ticker+" "+df.iloc[-1:,-1:]))
 
-def main():
-    exchange.get_data_from_yahoo(timeframe='1d')
-    conn = create_connection("trades.db")
+def main(config):
+    tickers = list(get_values(config['sectors']))
+    exchange.get_data_from_yahoo(tickers, timeframe=config['timeframe'])
+    conn = create_connection(config['database'])
     create_table(conn,sql_create_table)
-
-    ### Get tickers ###
-    tickers = pd.read_csv('tickers.csv')
 
     total_trades_wins=0
     total_trades_loss=0
     total_profits=0
     total_wins=0
     total_loss=0
-    # Initial wallet money
-    wallet=10000
 
     print("\n")
     print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')

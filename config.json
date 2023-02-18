@@ -1,0 +1,40 @@
+{
+    "user": "mdc",
+    "initial_balance": "1000",
+    "max_open_trades": 40,
+    "stake_amount": 25,
+    "tradable_balance_ratio": 0.99,
+    "timerange":2000,
+    "timewindow":200,
+    "timeframe": "1d",
+    "database": "mdc.db",
+
+    "sectors": {
+        "tech":       [ "GOOGL", "AAPL" , "AMZN", "META" , "INTC" , "MSFT" , "NVDA" , "CRM"  , "TSM"  , "TXN" , "CDNS", "SNPS", "AMD" , "STM" , "NXPI", "POWI" ],
+        "health":     [ "ABBV" , "AMGN" , "BMY" , "LLY"  , "JNJ"  , "MRK"  , "PFE"  , "REGN" , "RHHBY", "UNH" , "ANTM", "NVS" ],
+        "goods":      [ "KO"   , "CL"   , "GIS" , "JCI"  , "K"    , "KMB"  , "NSRGF", "PEP"  , "PG"   , "UN"  , "MCD" , "QSR" ],
+        "energy":     [ "CVX"  , "COP"  , "DVN" , "XOM"  , "KMI"  , "OXY"  , "SHEL" , "SLB"  , "TOT"  , "VLO" , "BP.L" ],
+        "finance":    [ "AXP"  , "BAC"  , "C"   , "GS"   , "JPM"  , "MS"   , "STT"  , "BX"   , "SCHW" , "WFC" , "HSBCA.L", "BARC.L" ],
+        "industry":   [ "MMM"  , "CAT"  , "GE"  , "HON"  , "LMT"  , "RTX"  , "SIEGY", "UTX"  , "UNP"  , "WM"  , "ASML" ],
+        "auto":       [ "BMWYY", "F"    , "GM"  , "HMC"  , "NSANY", "TSLA" , "TM"   , "VWAGY", "VLVLY", "STLA" ],
+        "aerospace":  [ "EADSY", "BA"   , "GD"  , "LMT"  , "NOC"  , "RTX"  , "SAFRF", "SPR"  , "THLLY", "UTX" ],
+        "civil":      [ "ACM"  , "FLR"  , "J"   , "KBR"  , "MTZ"  , "SNC"  , "STN"  , "TTEK" , "WSPOF", "PWR" ],
+        "tourism":    [ "ABNB" , "BKNG" , "CCL" , "DAL"  , "EXPE" , "HLT"  , "MAR"  , "RCL"  , "LUV"  , "TCOM" ],
+        "fashion":    [ "CPRI" , "FRCOY", "GPS" , "HNNMY", "IDEXF", "PPRUF", "LB"   , "NKE"  , "RL"   , "TPR" ],
+        "bio":        [ "AMGN" , "BIIB" , "GILD", "MRNA" , "REGN" , "VRTX" , "ILMN" , "CRSP" , "INCY" , "ISRG" ],
+        "fintech":    [ "ADYEY", "AFRM" , "BABA", "AXP"  , "MA"   , "PYPL" , "SQ"   , "GS"   , "V" ],
+        "comms":      [ "T"    , "CMCSA", "NFLX", "NOK"  , "SFTBY", "VZ"   , "TMUS" , "TCEHY" ],
+        "realestate": [ "AMT"  , "DLR"  , "EQIX", "PLD"  , "PSA"  , "SPG"  , "VTR"  , "BAM"  , "INVH", "ARE" ],
+        "retail":     [ "WMT"  , "HD"   , "COST", "TGT"  , "LOW"  , "TJX"  , "SBUX" , "CVS"  , "WBA" , "ROST"  , "DG"  , "DLTR" ],
+
+        "brazil":     [ "MGLU3.SA", "MELI", "B3SA3.SA", "VVAR3.SA", "PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "ABEV3.SA", "GGBR4.SA", "NTCO3.SA", "CPFE3.SA", "CIEL3.SA", "KROT3.SA" ],
+        "asian":      [ "SSNFL", "TWM", "INFY", "HYMTF", "CHL", "BIDU", "TWN" ],
+        "uk":         [ "AHT.L", "JD.L", "RMV.L", "PRU.L", "HLMA.L", "LSE.L", "SN.L", "CPG.L", "RSW.L", "DCC.L", "RB.L", "ULVR.L", "MCRO.L", "AV.L", "AVV.L", "SPX.L", "DGE.L", "CRDA.L", "HL.L", "VCT.L", "GAW.L", "OCDO.L", "HWDN.L", "INF.L", "SMT.L", "NMC.L", "DPLM.L", "ITRK.L", "BNZL.L", "HIK.L", "SMIN.L", "BOY.L", "JET.L" ]
+    },
+
+    "telegram": {
+        "enabled": true,
+        "token": "2066971074:AAEbEEm6CH2KIDxsY8UVsqPMIH5BZT7Mwkg",
+        "chat_id": "-632284693"
+    }
+}

@@ -3,15 +3,13 @@ import pandas as pd
 import yfinance as yf
 import datetime as dt
 
-tickers   = ""
 timeframe = '1d'
 
-def get_data_from_yahoo(reload_tickers=True, timeframe='1d', timerange=2000):
+def get_data_from_yahoo(tickers="", reload_tickers=True, timeframe='1d', timerange=2000):
     if not os.path.exists('stock_data'):
         os.makedirs('stock_data')
     if reload_tickers == False:
         return 0
-    tickers = pd.read_csv('tickers.csv')
     end = dt.date.today()
     start = end - dt.timedelta(days=timerange)
     for ticker in tickers:

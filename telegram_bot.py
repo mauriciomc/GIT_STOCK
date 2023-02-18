@@ -5,6 +5,7 @@ from subprocess import run
 from tabulate import tabulate
 import time, threading
 from time import sleep
+import json
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,8 +18,9 @@ class telegram_bot():
     closed_trades=[]
 
     def trader_tick(self, updater):
-        updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
-        self.opened_trades,self.closed_trades=trader.main()
+        #updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
+        updater.bot.sendMessage(chat_id=config['telegram']['chat_id'],text="Trader tick: Analyzing")
+        self.opened_trades,self.closed_trades=trader.main(config)
         sleep(43200)
         threading.Timer(43200.0, self.trader_tick(updater)).start()
 
@@ -67,13 +69,14 @@ class telegram_bot():
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', self, update, context.error)
 
-    def __init__(self):
+    def __init__(self, config):
         """Start the bot."""
-        # self.opened_trades,self.closed_trades=trader.main()
+
+
         # Create the Updater and pass it your bot's token.
         # Make sure to set use_context=True to use the new context based callbacks
         # "Live" bot
-        updater = Updater("2066971074:AAEbEEm6CH2KIDxsY8UVsqPMIH5BZT7Mwkg", use_context=True)
+        updater = Updater(config['telegram']['token'], use_context=True)
         # Test bot updater = Updater("1668686740:AAEv9ydKGjd8JJaFv2EhOD5KmglRguJ2fZc", use_context=True)
 
         # Get the dispatcher to register handlers
@@ -104,5 +107,8 @@ class telegram_bot():
 
 
 if __name__ == '__main__':
-    tb=telegram_bot()
+    with open("config.json",'r') as file:
+        config = json.load(file)
+    tb=telegram_bot(config)
+
 
