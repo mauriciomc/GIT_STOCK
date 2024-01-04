@@ -6,6 +6,8 @@ from tabulate import tabulate
 import time, threading
 from time import sleep
 import json
+import sys, getopt
+import datetime as dt
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -16,13 +18,24 @@ logger = logging.getLogger(__name__)
 class telegram_bot():
     opened_trades=[]
     closed_trades=[]
+    interval = 0
 
     def trader_tick(self, updater):
         #updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
-        updater.bot.sendMessage(chat_id=config['telegram']['chat_id'],text="Trader tick: Analyzing")
-        self.opened_trades,self.closed_trades=trader.main(config)
-        sleep(43200)
-        threading.Timer(43200.0, self.trader_tick(updater)).start()
+        #updater.bot.sendMessage(chat_id=self.config['telegram']['chat_id'],text="Trader tick: Analyzing")
+        self.opened_trades,self.closed_trades=trader.main(self.config)
+        current_time = dt.datetime.now().time()
+        sleep_time = 0
+        if ((current_time.hour*60 + current_time.minute) % self.interval == 0):
+            sleep_time = self.interval
+
+        else:
+            sleep_time = self.interval - ((current_time.hour*60 + current_time.minute) % self.interval)
+
+        sleep_time = sleep_time * 60
+        print(f'Ticker: Sleeping for {sleep_time} seconds')
+        sleep(sleep_time)
+        threading.Timer(sleep_time, self.trader_tick(updater)).start()
 
 
     # Define a few command handlers. These usually take the two arguments update and
@@ -32,7 +45,7 @@ class telegram_bot():
 
     def analyze(self, update, context):
         update.message.reply_text("Analyzing...")
-        self.opened_trades,self.closed_trades=trader.main()
+        self.opened_trades,self.closed_trades=trader.main(self.config)
 # TODO: Colocar em forma de link ou grafico baseado em algum site
 #        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
@@ -69,14 +82,27 @@ class telegram_bot():
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', self, update, context.error)
 
-    def __init__(self, config):
+    def __init__(self, argv):
         """Start the bot."""
+        try:
+            opts, args = getopt.getopt(argv,"c:",["config="])
+        except getopt.GetoptError:
+            print('telegram_bot.py -c <config_name.json>')
+            sys.exit(2)
+        for opt, arg in opts:
+            if opt == '-c':
+                configuration=arg
 
+        if configuration == "":
+            configuration = "config.json"
+
+        with open(configuration,'r') as file:
+            self.config = json.load(file)
 
         # Create the Updater and pass it your bot's token.
         # Make sure to set use_context=True to use the new context based callbacks
         # "Live" bot
-        updater = Updater(config['telegram']['token'], use_context=True)
+        updater = Updater(self.config['telegram']['token'], use_context=True)
         # Test bot updater = Updater("1668686740:AAEv9ydKGjd8JJaFv2EhOD5KmglRguJ2fZc", use_context=True)
 
         # Get the dispatcher to register handlers
@@ -98,7 +124,22 @@ class telegram_bot():
         # Start the Bot
         updater.start_polling()
 
+        timeframe = self.config['timeframe']
+        if timeframe == "1m":
+            self.interval = 1
+        elif timeframe == "5m":
+            self.interval = 5
+        elif timeframe == "15m":
+            self.interval = 15
+        elif timeframe == "30m":
+            self.interval = 30
+        elif timeframe == "1h":
+            self.interval = 60
+        else:
+            self.interval = 1440
+
         self.trader_tick(updater)
+
 
         # Run the bot until you press Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT. This should be used most of the time, since
@@ -107,8 +148,6 @@ class telegram_bot():
 
 
 if __name__ == '__main__':
-    with open("config.json",'r') as file:
-        config = json.load(file)
-    tb=telegram_bot(config)
+    tb=telegram_bot(sys.argv[1:])
 
 

@@ -29,10 +29,10 @@ sql_create_table = """ CREATE TABLE IF NOT EXISTS trades (
                                                             open_date date NOT NULL,
                                                             close_date date,
                                                             open_price float NOT NULL,
-                                                            close_price float NOT NULL
+                                                            close_price float NOT NULL,
+                                                            stake float NOT NULL,
+                                                            profit float
                                                  ); """
-
-
 
 def get_values(d):
     if isinstance(d, dict):
@@ -76,7 +76,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
-def show_open_trades(conn):
+def get_open_trades(conn):
     sql = ''' SELECT id, ticker, open_date, open_price from trades
               WHERE close_price = 0
               ORDER BY id, open_date
@@ -85,13 +85,16 @@ def show_open_trades(conn):
     cur = conn.cursor()
     cur.execute(sql)
     rows = cur.fetchall()
+    return rows
 
+def show_open_trades(conn):
+    rows=get_open_trades(conn)
     for row in rows:
         print(row)
 
     return rows
 
-def show_closed_trades(conn):
+def get_closed_trades(conn):
     sql = ''' SELECT id, ticker, open_date, open_price, close_date, close_price from trades
               WHERE close_date != 0
               ORDER BY id, open_date, close_date
@@ -100,7 +103,10 @@ def show_closed_trades(conn):
     cur = conn.cursor()
     cur.execute(sql)
     rows = cur.fetchall()
+    return rows
 
+def show_closed_trades(conn):
+    rows=get_closed_trades(conn)
     for row in rows:
         print(row)
 
@@ -122,21 +128,24 @@ def backtest(ticker, df):
     losses=0
     wins=0
     total_profit=0
+    is_open = False
     for index,row in df.iterrows():
         if index == 0:
-            bought_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
-            sold_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
+            bought_date = row['Datetime']
+            sold_date = row['Datetime']
 
-        if row['buy'] > 0:
-            bought_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
+        if row['buy'] > 0 and not is_open:
+            bought_date = row['Datetime']
             bought = float(row['close'])
+            is_open = True
             #print(row['Date'] + " found buy: " + str(bought))
-        elif row['sell'] > 0:
-            sold_date = dt.datetime.strptime(row['Date'], '%Y-%m-%d').date()
+        elif row['sell'] > 0 and is_open:
+            sold_date = row['Datetime']
             sold = float(row['close'])
+            is_open = False
             #print(row['Date'] + ' found sell: ' + str(sold))
 
-        if bought_date < sold_date and bought > 0 and sold > 0:
+        if bought_date < sold_date and bought > 0 and sold > 0 and not is_open:
             profit = round(float(get_rocp(bought, sold)),4)
             total_profit = total_profit + profit
             if profit > 0:
@@ -152,6 +161,21 @@ def backtest(ticker, df):
 
     return total_profit, trades_loss, trades_wins, losses, wins
 
+def strategy_test_buy(df):
+    df.loc[df.index[-1],'buy'] = 1
+    df.loc[df.index[-1],'sell'] = 0
+    return df
+
+def strategy_test_sell(df):
+    df.loc[df.index[-1],'sell'] = 1
+    df.loc[df.index[-1],'buy'] = 0
+    return df
+
+def strategy_test_buy_sell(df):
+    df.loc[df.index[-1],'buy'] = 1
+    df.loc[df.index[-1],'sell'] = 1
+    return df
+
 def strategy_cleci(df):
     #print(" -- Strategy Cleci -- \n")
     #df['highest_low'] = df['low'].rolling(window=200).max()
@@ -163,8 +187,8 @@ def strategy_cleci(df):
             lowest_low = row['low']
         if (row['low'] > highest_low) or (highest_low == 0):
             highest_low = row['low']
-        df.loc[(row['Date'] == df['Date']), 'lowest_low'] = lowest_low
-        df.loc[(row['Date'] == df['Date']), 'highest_low'] = highest_low
+        df.loc[(row['Datetime'] == df['Datetime']), 'lowest_low'] = lowest_low
+        df.loc[(row['Datetime'] == df['Datetime']), 'highest_low'] = highest_low
     # Populate Buy signals
     df.loc[
         (
@@ -381,14 +405,9 @@ def disambiguity(df):
     df['action'] = 'hold'
 
     # Disambiguation: Sell and Buy signals don't go together.
-    if df['buy'].iloc[-1] > 0 and df['sell'].iloc[-1] > 0:
-        df['action'] = 'hold'
-    elif (df['buy'].iloc[-1] > 0):
-        df['action'] = 'buy'
-    elif (df['sell'].iloc[-1] > 0):
-        df['action'] = 'sell'
-    else:
-        df['action'] = 'hold'
+    df.loc[(df['buy'] > 0), 'action'] = 'buy'
+    df.loc[(df['sell'] > 0), 'action'] = 'sell'
+    df.loc[(df['buy'] > 0) & (df['sell'] > 0), 'action'] = 'hold'
 
     return df
 
@@ -417,39 +436,60 @@ def compile_data(conn, ticker, df):
 
     df = strategy_cleci(df)
 
+    # df = strategy_test_buy(df)
+    # df = strategy_test_sell(df)
+
+    print(f'DISAMBIGUITY for ticker {ticker}')
     ### Fix buy and sell on the same candle ###
     df = disambiguity(df)
 
     ###### INSERT OR UPDATE TRADE IN DB #######
     trade = ""
 
-    if df['action'].iloc[-1] == 'buy':
-        # print("ADDING BUY")
-        sql = ''' INSERT OR REPLACE INTO trades(id,
-                                                ticker,
-                                                open_date,
-                                                open_price,
-                                                close_date,
-                                                close_price)
+    rows = get_open_trades(conn)
 
-                  VALUES( (SELECT id from trades where ticker = ? AND open_price != 0 AND close_price = 0), ?, ?, ?, ?, ?)
+    is_open = False
+
+    for row in rows:
+        if ticker in row:
+            print(f'Ticker {ticker} is open')
+            is_open = True
+
+    if df['action'].iloc[-1] == 'buy' and not is_open:
+        # print("ADDING BUY")
+        sql = ''' INSERT INTO trades(id,
+                                     ticker,
+                                     open_date,
+                                     open_price,
+                                     close_date,
+                                     close_price,
+                                     stake,
+                                     profit)
+
+                  VALUES( (SELECT id from trades where ticker = ? AND open_price = 0 AND close_price = 0), ?, ?, ?, ?, ?, ?, ?)
               '''
         trade = (ticker,
                  ticker,
-                 df['Date'].iloc[-1],
+                 df['Datetime'].iloc[-1],
                  round(df['close'].iloc[-1],4),
                  None,
-                 0)
+                 0,
+                 cfg['stake_amount'],
+                 cfg['open_fee'])
 
-    if df['action'].iloc[-1] == 'sell':
+    if df['action'].iloc[-1] == 'sell' and is_open:
         # print("ADDING SELL")
         sql = ''' UPDATE trades
-                  SET close_price = ?, close_date = ?
+                  SET close_price = ?, close_date = ?, profit = ((? - (SELECT open_price WHERE ticker = ? AND close_price = 0)/(SELECT open_price WHERE ticker = ? AND close_price = 0)) - ?)*(SELECT stake WHERE ticker = ? AND close_price = 0)
                   WHERE ticker = ? AND close_price = 0
               '''
-
         trade = (round(df['close'].iloc[-1],4),
-                 df['Date'].iloc[-1],
+                 df['Datetime'].iloc[-1],
+                 round(df['close'].iloc[-1],4),
+                 ticker,
+                 ticker,
+                 ticker,
+                 cfg['close_fee'],
                  ticker)
 
     if trade:
@@ -463,9 +503,14 @@ def compile_data(conn, ticker, df):
     #print(str(ticker+" "+df.iloc[-1:,-1:]))
 
 def main(config):
+    global cfg
     tickers = list(get_values(config['sectors']))
-    exchange.get_data_from_yahoo(tickers, timeframe=config['timeframe'])
+    exchange.get_data_from_yahoo(tickers, daterange=config['daterange'], timeframe=config['timeframe'])
     conn = create_connection(config['database'])
+    balance = config['initial_balance']
+    cfg=config
+    timeframe=config['timeframe']
+
     create_table(conn,sql_create_table)
 
     total_trades_wins=0
@@ -475,10 +520,18 @@ def main(config):
     total_loss=0
 
     print("\n")
-    print('Ticker\t\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
+    print('Ticker\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
     print('=========================================================================================================================')
     for ticker in tickers:
-        df = pd.read_csv('stock_data/{}.csv'.format(ticker))
+        try:
+            if os.path.isfile(f'stock_data/{ticker}_{timeframe}.csv'):
+                df = pd.read_csv(f'stock_data/{ticker}_{timeframe}.csv')
+            else:
+                continue
+        except Exception as e:
+            print(e)
+            continue
+
         if df.empty:
             continue
 
@@ -503,8 +556,8 @@ def main(config):
 
         save_df = True
         if save_df:
-            df = df.set_index('Date')
-            df.to_csv('stock_data/{}_analyzed.csv'.format(ticker))
+            df.set_index('Datetime')
+            df.to_csv(f'stock_data/{ticker}_{timeframe}_analyzed.csv')
 
     print("================================================================================================================|")
     print('\t| Total Trades\t|  Total # Wins\t|  Total # Loss\t|  Total Wins %\t|  Total Loss %\t|  Total Profit %\t|  ')
