@@ -15,6 +15,22 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+P_ID = 0
+P_TICKER = 1
+P_POSITION = 2
+P_OPEN_DATE = 3
+P_CLOSE_DATE = 4
+P_OPEN = 5
+P_CLOSE = 6
+P_STAKE = 7
+P_OPEN_FEE = 8
+P_CLOSE_FEE = 9
+P_PROFIT = 10
+P_STRATEGY = 11
+
+P_COLS=["ID", "TICKER", "POSITION", "OPEN_DATE", "CLOSE_DATE", "OPEN", "CLOSE", "STAKE", "OPEN_FEE", "CLOSE_FEE", "PROFIT", "STRATEGY"]
+
+
 class telegram_bot():
     opened_trades=[]
     closed_trades=[]
@@ -53,23 +69,28 @@ class telegram_bot():
     def opened(self, update, context):
         #result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
         trades=self.opened_trades
+        if trades:
+            trades.drop(['CLOSE_DATE','CLOSE','CLOSE_FEE','PROFIT','STRATEGY','OPEN_FEE'],1,inplace=True)
         if len(trades) > 100:
             for x in range(0, len(trades), 100):
-                result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
+                result=((tabulate(trades[x:x+100], headers=['ID','Ticker','ODate','Open','Stake'], tablefmt='simple',numalign="right")))
                 update.message.reply_text(result, parse_mode='HTML')
         else:
-            result=((tabulate(trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
+            result=((tabulate(trades, headers=['ID', 'Ticker','ODate','Open'], tablefmt='simple',numalign="right")))
             update.message.reply_text(result, parse_mode='HTML')
 
     def closed(self, update, context):
         #result=((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
         trades=self.closed_trades
+        if trades:
+            trades.drop(['CLOSE_FEE','STRATEGY','OPEN_FEE'],1,inplace=True)
+
         if len(trades) > 100:
             for x in range(0, len(trades), 100):
-                result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+                result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Pos','ODate','Open','CDate','Close','Profit'], tablefmt='simple',numalign="right")))
                 update.message.reply_text(result, parse_mode='HTML')
         else:
-            result=((tabulate(trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
+            result=((tabulate(trades, headers=['ID','Ticker','Pos','ODate','Open','CDate','Close'], tablefmt='simple',numalign="right")))
             update.message.reply_text(result, parse_mode='HTML')
 
     def help(self, update, context):

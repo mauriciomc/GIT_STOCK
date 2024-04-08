@@ -1,5 +1,5 @@
 {
-    "user": "mdc_test",
+    "user": "cleci",
     "initial_balance": 1000,
     "max_open_trades": 40,
     "stake_amount": 40,
@@ -7,11 +7,12 @@
     "daterange":2000,
     "timewindow":200,
     "timeframe": "1d",
-    "database": "mdc.db",
+    "database": "cleci.db",
     "open_fee": 0.001,
     "close_fee": 0.001,
     "stop_loss": 5,
     "take_profit": 100,
+    "strategy" : "cleci",
 
     "sectors": {
         "tech":       [ "GOOGL", "AAPL" , "AMZN", "META" , "INTC" , "MSFT" , "NVDA" , "CRM"  , "TSM"  , "TXN" , "CDNS", "SNPS", "AMD" , "STM" , "NXPI", "POWI" ],

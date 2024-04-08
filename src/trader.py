@@ -3,7 +3,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 from matplotlib import style
 import numpy as np
-import os
+import sys,os
 import pandas as pd
 import pandas_datareader.data as web
 import pickle
@@ -22,17 +22,42 @@ style.use('ggplot')
 from typing import Iterable
 import sqlite3
 from sqlite3 import Error
+import strategy as strategy
+import importlib
+import imp
+
+#Constants
+P_ID = 0
+P_TICKER = 1
+P_POSITION = 2
+P_OPEN_DATE = 3
+P_CLOSE_DATE = 4
+P_OPEN = 5
+P_CLOSE = 6
+P_STAKE = 7
+P_OPEN_FEE = 8
+P_CLOSE_FEE = 9
+P_PROFIT = 10
+P_STRATEGY = 11
+
+P_COLS=["ID", "TICKER", "POSITION", "OPEN_DATE", "CLOSE_DATE", "OPEN", "CLOSE", "STAKE", "OPEN_FEE", "CLOSE_FEE", "PROFIT", "STRATEGY"]
 
 sql_create_table = """ CREATE TABLE IF NOT EXISTS trades (
                                                             id integer PRIMARY KEY,
                                                             ticker text NOT NULL,
-                                                            open_date date NOT NULL,
-                                                            close_date date,
+                                                            position text NOT_NULL,
+                                                            open_date datetime NOT NULL,
+                                                            close_date datetime,
                                                             open_price float NOT NULL,
                                                             close_price float NOT NULL,
                                                             stake float NOT NULL,
-                                                            profit float
+                                                            open_fee float NOT NULL,
+                                                            close_fee float,
+                                                            profit float,
+                                                            strategy text
                                                  ); """
+
+
 
 def get_values(d):
     if isinstance(d, dict):
@@ -77,11 +102,18 @@ def create_table(conn, create_table_sql):
         print(e)
 
 def get_open_trades(conn):
-    sql = ''' SELECT id, ticker, open_date, open_price from trades
-              WHERE close_price = 0
+    sql = ''' SELECT * from trades
+              WHERE position = 'open_long' OR position = 'open_short'
               ORDER BY id, open_date
           '''
 
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    return rows
+
+def get_data_from_id(conn,id,data):
+    sql = f"SELECT {data} from trades WHERE id = {id}"
     cur = conn.cursor()
     cur.execute(sql)
     rows = cur.fetchall()
@@ -95,9 +127,19 @@ def show_open_trades(conn):
     return rows
 
 def get_closed_trades(conn):
-    sql = ''' SELECT id, ticker, open_date, open_price, close_date, close_price from trades
+    sql = ''' SELECT * from trades
               WHERE close_date != 0
               ORDER BY id, open_date, close_date
+          '''
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    return rows
+
+def get_total_stake(conn):
+    sql = ''' SELECT total(stake) from trades
+              WHERE position = 'open_long' OR position = 'open_short'
           '''
 
     cur = conn.cursor()
@@ -161,49 +203,6 @@ def backtest(ticker, df):
 
     return total_profit, trades_loss, trades_wins, losses, wins
 
-def strategy_test_buy(df):
-    df.loc[df.index[-1],'buy'] = 1
-    df.loc[df.index[-1],'sell'] = 0
-    return df
-
-def strategy_test_sell(df):
-    df.loc[df.index[-1],'sell'] = 1
-    df.loc[df.index[-1],'buy'] = 0
-    return df
-
-def strategy_test_buy_sell(df):
-    df.loc[df.index[-1],'buy'] = 1
-    df.loc[df.index[-1],'sell'] = 1
-    return df
-
-def strategy_cleci(df):
-    #print(" -- Strategy Cleci -- \n")
-    #df['highest_low'] = df['low'].rolling(window=200).max()
-    #df['lowest_low']  = df['low'].rolling(window=200).min()
-    highest_low = 0
-    lowest_low = 0
-    for index, row in df.iterrows():
-        if (row['low'] < lowest_low) or (lowest_low == 0):
-            lowest_low = row['low']
-        if (row['low'] > highest_low) or (highest_low == 0):
-            highest_low = row['low']
-        df.loc[(row['Datetime'] == df['Datetime']), 'lowest_low'] = lowest_low
-        df.loc[(row['Datetime'] == df['Datetime']), 'highest_low'] = highest_low
-    # Populate Buy signals
-    df.loc[
-        (
-            ( df['close'].crossed_below(df['lowest_low'] * 1.1) )
-        ),
-        'buy'] = 1
-
-    # Populate Sell signals
-    df.loc[
-        (
-            df['close'].crossed_above(df['highest_low'] * 0.9)
-        ),
-        'sell'] = 1
-
-    return df
 
 def strategy_ema_cross(df):
     # Exponential Moving Averages
@@ -302,116 +301,118 @@ def strategy_ichi(dataframe):
     return dataframe
 
 ## Default MACD strategy
-def strategy(df):
-    # TODO: Add class strategy to be called by this thread
-    ######## STRATEGY START #######
-    # Populate indicators
-    # Compute RSI
-    df['rsi'] = ta.RSI(df,14)
-
-    # Compute BB
-    bollinger = qt.bollinger_bands(qt.typical_price(df), window=21, stds=2)
-    df['upper'] = bollinger['upper']
-    df['mid']   = bollinger['mid']
-    df['lower'] = bollinger['lower']
-
-    # Compute MACD
-    macd = ta.MACD(df)
-    df['macd']       = macd['macd']
-    df['macdsignal'] = macd['macdsignal']
-    df['macdhist']   = macd['macdhist']
-
-    # Triple Exponential Moving Average
-    df['tema'] = ta.TEMA(df,9)
-
-    # Populate Buy signals
-    df.loc[
-        (
-            ( df['macd'].crossed_above(df['macdsignal']) ) &
-            ( df['close'] >= df['tema'] * 0.5 ) &
-            ( df['macd'] >= 0 ) &
-            ( df['volume'] > 0 )
-        ),
-        'buy'] = 1
-
-    # Populate Sell Signals
-    df.loc[
-        (
-            ( df['macd'].crossed_below(df['macdsignal']) ) &
-            ( df['close'] <= df['tema'] * 1.05 ) &
-            ( df['volume'] > 0 )
-        ),
-        'sell'] = 1
-    ####### STRATEGY END ########
-    return df
+#def strategy(df):
+#    # TODO: Add class strategy to be called by this thread
+#    ######## STRATEGY START #######
+#    # Populate indicators
+#    # Compute RSI
+#    df['rsi'] = ta.RSI(df,14)
+#
+#    # Compute BB
+#    bollinger = qt.bollinger_bands(qt.typical_price(df), window=21, stds=2)
+#    df['upper'] = bollinger['upper']
+#    df['mid']   = bollinger['mid']
+#    df['lower'] = bollinger['lower']
+#
+#    # Compute MACD
+#    macd = ta.MACD(df)
+#    df['macd']       = macd['macd']
+#    df['macdsignal'] = macd['macdsignal']
+#    df['macdhist']   = macd['macdhist']
+#
+#    # Triple Exponential Moving Average
+#    df['tema'] = ta.TEMA(df,9)
+#
+#    # Populate Buy signals
+#    df.loc[
+#        (
+#            ( df['macd'].crossed_above(df['macdsignal']) ) &
+#            ( df['close'] >= df['tema'] * 0.5 ) &
+#            ( df['macd'] >= 0 ) &
+#            ( df['volume'] > 0 )
+#        ),
+#        'buy'] = 1
+#
+#    # Populate Sell Signals
+#    df.loc[
+#        (
+#            ( df['macd'].crossed_below(df['macdsignal']) ) &
+#            ( df['close'] <= df['tema'] * 1.05 ) &
+#            ( df['volume'] > 0 )
+#        ),
+#        'sell'] = 1
+#    ####### STRATEGY END ########
+#    return df
 
 # Strategy ichimoku heiken version 2
-def strategy_ichi_v2(df):
-    #Heiken Ashi Candlestick Data
-    heikinashi = qt.indicators.heikinashi(df)
-
-    ha_ichi = ichimoku( heikinashi,
-                        conversion_line_period=9,
-                        base_line_periods=26,
-                        laggin_span=52,
-                        displacement=26
-    )
-    df['ha_open'] = heikinashi['open']
-    df['ha_close'] = heikinashi['close']
-    df['ha_high'] = heikinashi['high']
-    df['ha_low'] = heikinashi['low']
-
-    df['tenkan'] = ha_ichi['tenkan_sen']
-    df['kijun'] = ha_ichi['kijun_sen']
-    df['senkou_a'] = ha_ichi['senkou_span_a']
-    df['senkou_b'] = ha_ichi['senkou_span_b']
-    df['cloud_green'] = ha_ichi['cloud_green']
-    df['cloud_red'] = ha_ichi['cloud_red']
-    df['chikou'] = ha_ichi['chikou_span']
-
-    df.loc[
-    (
-        (
-            (df['ha_close'].crossed_above(df['senkou_a'])) &
-            (df['ha_close'].shift(1) > df['senkou_a']) &
-            (df['ha_close'].shift(1) > df['senkou_b'])
-        )
-        |
-        (
-            (df['ha_close'].crossed_above(df['senkou_b'])) &
-            (df['ha_close'].shift(1) > df['senkou_a']) &
-            (df['ha_close'].shift(1) > df['senkou_b'])
-        )
-        |
-        (
-            (df['senkou_a'].crossed_above(df['senkou_b']))
-        )
-     ),
-       'buy'] = 1
-
-    df.loc[
-    (
-        (df['tenkan'].crossed_below(df['kijun'])) &
-        (df['tenkan'].shift(1).crossed_below(df['kijun']).shift(1)) |
-        (df['chikou'].crossed_below(df['tenkan']))
-    ),
-      'sell'] = 1
-
-    return df
+#def strategy_ichi_v2(df):
+#    #Heiken Ashi Candlestick Data
+#    heikinashi = qt.indicators.heikinashi(df)
+#
+#    ha_ichi = ichimoku( heikinashi,
+#                        conversion_line_period=9,
+#                        base_line_periods=26,
+#                        laggin_span=52,
+#                        displacement=26
+#    )
+#    df['ha_open'] = heikinashi['open']
+#    df['ha_close'] = heikinashi['close']
+#    df['ha_high'] = heikinashi['high']
+#    df['ha_low'] = heikinashi['low']
+#
+#    df['tenkan'] = ha_ichi['tenkan_sen']
+#    df['kijun'] = ha_ichi['kijun_sen']
+#    df['senkou_a'] = ha_ichi['senkou_span_a']
+#    df['senkou_b'] = ha_ichi['senkou_span_b']
+#    df['cloud_green'] = ha_ichi['cloud_green']
+#    df['cloud_red'] = ha_ichi['cloud_red']
+#    df['chikou'] = ha_ichi['chikou_span']
+#
+#    df.loc[
+#    (
+#        (
+#            (df['ha_close'].crossed_above(df['senkou_a'])) &
+#            (df['ha_close'].shift(1) > df['senkou_a']) &
+#            (df['ha_close'].shift(1) > df['senkou_b'])
+#        )
+#        |
+#        (
+#            (df['ha_close'].crossed_above(df['senkou_b'])) &
+#            (df['ha_close'].shift(1) > df['senkou_a']) &
+#            (df['ha_close'].shift(1) > df['senkou_b'])
+#        )
+#        |
+#        (
+#            (df['senkou_a'].crossed_above(df['senkou_b']))
+#        )
+#     ),
+#       'buy'] = 1
+#
+#    df.loc[
+#    (
+#        (df['tenkan'].crossed_below(df['kijun'])) &
+#        (df['tenkan'].shift(1).crossed_below(df['kijun']).shift(1)) |
+#        (df['chikou'].crossed_below(df['tenkan']))
+#    ),
+#      'sell'] = 1
+#
+#    return df
 
 def disambiguity(df):
     # Replace NaN values with 0
     df=df.fillna(0)
     df['action'] = 'hold'
-
     # Disambiguation: Sell and Buy signals don't go together.
-    df.loc[(df['buy'] > 0), 'action'] = 'buy'
-    df.loc[(df['sell'] > 0), 'action'] = 'sell'
-    df.loc[(df['buy'] > 0) & (df['sell'] > 0), 'action'] = 'hold'
+    df.loc[(df['open_long'] > 0), 'action'] = 'open_long'
+    df.loc[(df['close_long'] > 0), 'action'] = 'close_long'
+    df.loc[(df['open_short'] > 0), 'action'] = 'open_short'
+    df.loc[(df['close_short'] > 0), 'action'] = 'close_short'
+    df.loc[(df['open_long'] > 0) & (df['close_long'] > 0), 'action'] = 'hold'
+    df.loc[(df['open_short'] > 0) & (df['close_short'] > 0), 'action'] = 'hold'
 
     return df
 
-def compile_data(conn, ticker, df):
+def prepare_data(conn, ticker, df):
     ## Prepare dataframe to be workable with talib
     df.reindex(columns=["Close","Adj Close"])
     df.drop(['Close'],1,inplace=True)
@@ -420,76 +421,78 @@ def compile_data(conn, ticker, df):
     df.rename(columns = {'Low': 'low'}, inplace=True)
     df.rename(columns = {'Volume': 'volume'}, inplace=True)
     df.rename(columns = {'Adj Close': 'close'}, inplace=True)
+    return df
 
-    ##### ADD STRATEGY HERE #####
-    # Default strategy
-    # df = strategy(df)
-
-    # Simple EMA crossover
-    # df = strategy_ema_cross(df)
-
-    # Ichimoku on heiken ashi cloud
-    # df = strategy_ichi(df)
-
-    # Ichimoku on heiken ashi v2
-    # df = strategy_ichi_v2(df)
-
-    df = strategy_cleci(df)
-
-    # df = strategy_test_buy(df)
-    # df = strategy_test_sell(df)
-
-    print(f'DISAMBIGUITY for ticker {ticker}')
-    ### Fix buy and sell on the same candle ###
-    df = disambiguity(df)
+def take_action(conn, ticker, df):
+    global remaining_balance
+    if cfg['stake_amount'] > remaining_balance:
+        print(f"Insuffiecient funds: remaining balance = {remaining_balance} and stake = {cfg['stake_amount']}")
+        return df
 
     ###### INSERT OR UPDATE TRADE IN DB #######
     trade = ""
 
+
+    #rows = show_open_trades(conn)
     rows = get_open_trades(conn)
 
     is_open = False
+
+    open_trade = []
 
     for row in rows:
         if ticker in row:
             print(f'Ticker {ticker} is open')
             is_open = True
+            open_trade = row
 
-    if df['action'].iloc[-1] == 'buy' and not is_open:
-        # print("ADDING BUY")
+    if df['action'].iloc[-1] == 'open_long' and not is_open:
+        if cfg['stake_amount'] > remaining_balance:
+            print("Insuficient Funds")
+            return df
+
         sql = ''' INSERT INTO trades(id,
                                      ticker,
+                                     position,
                                      open_date,
                                      open_price,
                                      close_date,
                                      close_price,
                                      stake,
-                                     profit)
+                                     open_fee,
+                                     close_fee,
+                                     profit,
+                                     strategy)
 
-                  VALUES( (SELECT id from trades where ticker = ? AND open_price = 0 AND close_price = 0), ?, ?, ?, ?, ?, ?, ?)
+                  VALUES( (SELECT id from trades where ticker = ? AND open_price = 0 AND close_price = 0), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               '''
         trade = (ticker,
                  ticker,
+                 'open_long',
                  df['Datetime'].iloc[-1],
                  round(df['close'].iloc[-1],4),
                  None,
                  0,
                  cfg['stake_amount'],
-                 cfg['open_fee'])
+                 cfg['open_fee'],
+                 0,
+                 0,
+                 cfg['strategy'])
 
-    if df['action'].iloc[-1] == 'sell' and is_open:
-        # print("ADDING SELL")
-        sql = ''' UPDATE trades
-                  SET close_price = ?, close_date = ?, profit = ((? - (SELECT open_price WHERE ticker = ? AND close_price = 0)/(SELECT open_price WHERE ticker = ? AND close_price = 0)) - ?)*(SELECT stake WHERE ticker = ? AND close_price = 0)
-                  WHERE ticker = ? AND close_price = 0
-              '''
+    if df['action'].iloc[-1] == 'close_long' and is_open:
+
+        print (f"({round(df['close'].iloc[-1],4)}-{open_trade[P_OPEN]})/{open_trade[P_OPEN]}")
+        profit = round((float(df['close'].iloc[-1])-float(open_trade[P_OPEN]))/float(open_trade[P_OPEN]),4)*100
+        remaining_balance = remaining_balance + (profit + 1)*open_trade[P_STAKE]
+        sql =   f"UPDATE trades \
+                  SET position = 'close_long', \
+                      close_price = ?,\
+                      close_date = ?,\
+                      profit = {float((profit*open_trade[P_STAKE])/100)}\
+                  WHERE ticker = ? AND close_price = 0\
+              "
         trade = (round(df['close'].iloc[-1],4),
                  df['Datetime'].iloc[-1],
-                 round(df['close'].iloc[-1],4),
-                 ticker,
-                 ticker,
-                 ticker,
-                 cfg['close_fee'],
                  ticker)
 
     if trade:
@@ -498,30 +501,45 @@ def compile_data(conn, ticker, df):
         conn.commit()
 
     return df
-    ###### END DB OPERATION ##########
-    #df.columns = [''] * len(df.columns)
-    #print(str(ticker+" "+df.iloc[-1:,-1:]))
+
+def load_from_file(class_filepath,class_name):
+    class_inst = None
+    expected_class = class_name
+
+    mod_name,file_ext = os.path.splitext(os.path.split(class_filepath)[-1])
+
+    if file_ext.lower() == '.py':
+        py_mod = imp.load_source(mod_name, class_filepath)
+
+    elif file_ext.lower() == '.pyc':
+        py_mod = imp.load_compiled(mod_name, class_filepath)
+
+    if hasattr(py_mod, expected_class):
+        class_inst = getattr(py_mod, expected_class)(cfg)
+
+    return class_inst
+
+def strategy_resolver(cfg: dict) -> strategy:
+    curr_path = os.getcwd()
+    sys.path.insert(0,f"{curr_path}/strategies")
+    strat = load_from_file(f"{curr_path}/strategies/{cfg['strategy']}.py",cfg['strategy'])
+    return strat
 
 def main(config):
     global cfg
+    global remaining_balance
     tickers = list(get_values(config['sectors']))
     exchange.get_data_from_yahoo(tickers, daterange=config['daterange'], timeframe=config['timeframe'])
-    conn = create_connection(config['database'])
-    balance = config['initial_balance']
+    conn = create_connection(f"databases/{config['database']}")
     cfg=config
     timeframe=config['timeframe']
 
     create_table(conn,sql_create_table)
+    total_stake = get_total_stake(conn)[0][0]
+    remaining_balance = cfg['initial_balance'] - total_stake
+    print(f"total_stake = {total_stake}")
+    print(f"remaining balance = {remaining_balance}")
 
-    total_trades_wins=0
-    total_trades_loss=0
-    total_profits=0
-    total_wins=0
-    total_loss=0
-
-    print("\n")
-    print('Ticker\t|\tTrades\t|\t# Wins\t|\t# Loss\t|\t% Wins\t|\t% Loss\t|\tTotal Profit %\t|  ')
-    print('=========================================================================================================================')
     for ticker in tickers:
         try:
             if os.path.isfile(f'stock_data/{ticker}_{timeframe}.csv'):
@@ -535,57 +553,26 @@ def main(config):
         if df.empty:
             continue
 
-        df = compile_data(conn, ticker, df)
+        strat = strategy_resolver(cfg)
+        df = prepare_data(conn, ticker, df)
+        df = strat.populate(df)
+        df = strat.open_long(df)
+        df = strat.close_long(df)
+        df = strat.open_short(df)
+        df = strat.close_short(df)
+        df = disambiguity(df)
+        df = take_action(conn, ticker, df)
+        df.set_index('Datetime')
+        df.to_csv(f'stock_data/{ticker}_{timeframe}_analyzed.csv')
 
-        ticker_total_profits, trades_loss, trades_wins, losses, wins = backtest(ticker,df)
-
-        print(str(ticker)+'\t|\t'+\
-              str(trades_loss+trades_wins)+'\t|\t'+\
-              str(trades_wins)+'\t|\t'+\
-              str(trades_loss)+'\t|\t'+\
-              str(round(wins,2))+'\t|\t'+\
-              str(round(losses,2))+'\t|\t'+\
-              str(round(ticker_total_profits,2))+'\t\t|'
-        )
-
-        total_profits = total_profits + ticker_total_profits
-        total_wins = total_wins + wins
-        total_loss = total_loss + losses
-        total_trades_wins = total_trades_wins + trades_wins
-        total_trades_loss = total_trades_loss + trades_loss
-
-        save_df = True
-        if save_df:
-            df.set_index('Datetime')
-            df.to_csv(f'stock_data/{ticker}_{timeframe}_analyzed.csv')
-
-    print("================================================================================================================|")
-    print('\t| Total Trades\t|  Total # Wins\t|  Total # Loss\t|  Total Wins %\t|  Total Loss %\t|  Total Profit %\t|  ')
-    print("----------------------------------------------------------------------------------------------------------------|")
-    print("Total"+'\t|\t'+\
-          str(total_trades_loss+total_trades_wins)+'\t|\t'+\
-          str(total_trades_wins)+'\t|\t'+\
-          str(total_trades_loss)+'\t|\t'+\
-          str(round(total_wins,2))+'\t|\t'+\
-          str(round(total_loss,2))+'\t|\t'+\
-          str(round(total_profits,2))+'\t\t|'
-        )
-    print("================================================================================================================|")
-    print("")
-    print("#################################################################################################################")
-    print("###############       Open Trades      ##########################################################################")
-    print("ID - Ticker --- Open Date -- Open ")
     opened = show_open_trades(conn)
-    print("#################################################################################################################")
-    print("###############      Closed Trades     ##########################################################################")
-    print("ID -- Ticker --- Open Date -- Open -- Close Date -- Close ")
     closed = show_closed_trades(conn)
-    opened = pd.DataFrame(opened,columns=["ID","Ticker","Date","Open"])
+    opened = pd.DataFrame(opened,columns=P_COLS)
     opened.set_index('ID', inplace=True)
-    opened["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+opened["Ticker"]+"'>"+opened["Ticker"]+"</a>"
-    closed = pd.DataFrame(closed,columns=["ID","Ticker","Open Date","Open","Closed Date","Close"])
+    opened["TICKER"] = "<a href='https://uk.finance.yahoo.com/quote/"+opened["TICKER"]+"'>"+opened["TICKER"]+"</a>"
+    closed = pd.DataFrame(closed,columns=P_COLS)
     closed.set_index('ID', inplace=True)
-    closed["Ticker"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["Ticker"]+"'>"+closed["Ticker"]+"</a>"
+    closed["TICKER"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["TICKER"]+"'>"+closed["TICKER"]+"</a>"
     return opened,closed
 
 #### MAIN ####

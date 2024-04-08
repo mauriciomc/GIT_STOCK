@@ -1,0 +1,26 @@
+{
+    "user": "mdc_test",
+    "initial_balance": 1000,
+    "max_open_trades": 40,
+    "stake_amount": 40,
+    "tradable_balance_ratio": 0.99,
+    "daterange":2000,
+    "timewindow":200,
+    "timeframe": "15m",
+    "database": "mdc_test_15m.db",
+    "open_fee": 0.001,
+    "close_fee": 0.001,
+    "stop_loss": 5,
+    "take_profit": 100,
+    "strategy":"open_close",
+
+    "sectors": {
+        "crypto":     [ "AAPL", "BTC-USD", "ETH-USD", "USDT-USD", "BNB-USD", "SOL-USD","USDC-USD","XRP-USD","STETH-USD","DOGE-USD"]
+    },
+
+    "telegram": {
+        "enabled": true,
+        "token": "2066971074:AAEbEEm6CH2KIDxsY8UVsqPMIH5BZT7Mwkg",
+        "chat_id": "-632284693"
+    }
+}
