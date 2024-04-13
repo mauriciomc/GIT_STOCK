@@ -34,12 +34,15 @@ P_COLS=["ID", "TICKER", "POSITION", "OPEN_DATE", "CLOSE_DATE", "OPEN", "CLOSE", 
 class telegram_bot():
     opened_trades=[]
     closed_trades=[]
+    profit = 0
+    balance = 0
+
     interval = 0
 
     def trader_tick(self, updater):
         #updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
         #updater.bot.sendMessage(chat_id=self.config['telegram']['chat_id'],text="Trader tick: Analyzing")
-        self.opened_trades,self.closed_trades=trader.main(self.config)
+        self.opened_trades,self.closed_trades,self.profit,self.balance=trader.main(self.config)
         current_time = dt.datetime.now().time()
         sleep_time = 0
         if ((current_time.hour*60 + current_time.minute) % self.interval == 0):
@@ -61,7 +64,7 @@ class telegram_bot():
 
     def analyze(self, update, context):
         update.message.reply_text("Analyzing...")
-        self.opened_trades,self.closed_trades=trader.main(self.config)
+        self.opened_trades,self.closed_trades,self.profit,self.balance=trader.main(self.config)
 # TODO: Colocar em forma de link ou grafico baseado em algum site
 #        self.opened_trades.loc[:,1]=str("<a href='http://fundamentus.com.br/detalhes.php?papel={0}'>{0}</a>".format(self.opened_trades.loc[:,1]('.SA','')))
         update.message.reply_text("Finished")
@@ -69,8 +72,11 @@ class telegram_bot():
     def opened(self, update, context):
         #result=((tabulate(self.opened_trades, headers=['ID', 'Ticker','Open Date','Open'], tablefmt='simple',numalign="right")))
         trades=self.opened_trades
-        if trades:
-            trades.drop(['CLOSE_DATE','CLOSE','CLOSE_FEE','PROFIT','STRATEGY','OPEN_FEE'],1,inplace=True)
+        if len(trades) != 0:
+            try:
+                trades.drop(['CLOSE_DATE','CLOSE','CLOSE_FEE','PROFIT','STRATEGY','OPEN_FEE'],1,inplace=True)
+            except:
+                print(f"Exception Open: Trades\n{trades}")
         if len(trades) > 100:
             for x in range(0, len(trades), 100):
                 result=((tabulate(trades[x:x+100], headers=['ID','Ticker','ODate','Open','Stake'], tablefmt='simple',numalign="right")))
@@ -82,9 +88,11 @@ class telegram_bot():
     def closed(self, update, context):
         #result=((tabulate(self.closed_trades, headers=['ID', 'Ticker','Open Date','Open','Close Date','Close'], tablefmt='simple',numalign="right")))
         trades=self.closed_trades
-        if trades:
-            trades.drop(['CLOSE_FEE','STRATEGY','OPEN_FEE'],1,inplace=True)
-
+        if len(trades) != 0:
+            try:
+                trades.drop(['CLOSE_FEE','STRATEGY','OPEN_FEE'],1,inplace=True)
+            except:
+                print(f"Exception Close: Trades\n{trades}")
         if len(trades) > 100:
             for x in range(0, len(trades), 100):
                 result=((tabulate(trades[x:x+100], headers=['ID', 'Ticker','Pos','ODate','Open','CDate','Close','Profit'], tablefmt='simple',numalign="right")))
@@ -92,6 +100,9 @@ class telegram_bot():
         else:
             result=((tabulate(trades, headers=['ID','Ticker','Pos','ODate','Open','CDate','Close'], tablefmt='simple',numalign="right")))
             update.message.reply_text(result, parse_mode='HTML')
+
+    def info(self, update, context):
+        update.message.reply_text(f"Profit = {self.profit}\nBalance = {self.balance}")
 
     def help(self, update, context):
         update.message.reply_text("Available options \n/start    : start trader\n/open    : show open trades\n/closed  : show closed trades\n/analyze : Open or close trades based on the analysis")
@@ -135,6 +146,7 @@ class telegram_bot():
         dp.add_handler(CommandHandler("open", self.opened))
         dp.add_handler(CommandHandler("closed", self.closed))
         dp.add_handler(CommandHandler("analyze", self.analyze))
+        dp.add_handler(CommandHandler("info",self.info))
 
         # on noncommand i.e message - echo the message on Telegram
         dp.add_handler(MessageHandler(Filters.text, self.not_found))

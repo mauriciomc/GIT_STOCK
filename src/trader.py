@@ -147,6 +147,16 @@ def get_total_stake(conn):
     rows = cur.fetchall()
     return rows
 
+def get_total_profit(conn):
+    sql = ''' SELECT total(profit) from trades
+              WHERE position = 'close_long' OR position = 'close_short'
+          '''
+
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    return rows
+
 def show_closed_trades(conn):
     rows=get_closed_trades(conn)
     for row in rows:
@@ -539,6 +549,7 @@ def main(config):
     remaining_balance = cfg['initial_balance'] - total_stake
     print(f"total_stake = {total_stake}")
     print(f"remaining balance = {remaining_balance}")
+    strat = strategy_resolver(cfg)
 
     for ticker in tickers:
         try:
@@ -553,7 +564,7 @@ def main(config):
         if df.empty:
             continue
 
-        strat = strategy_resolver(cfg)
+        print(f"Analysing {ticker}")
         df = prepare_data(conn, ticker, df)
         df = strat.populate(df)
         df = strat.open_long(df)
@@ -573,7 +584,8 @@ def main(config):
     closed = pd.DataFrame(closed,columns=P_COLS)
     closed.set_index('ID', inplace=True)
     closed["TICKER"] = "<a href='https://uk.finance.yahoo.com/quote/"+closed["TICKER"]+"'>"+closed["TICKER"]+"</a>"
-    return opened,closed
+    total_profit = get_total_profit(conn)[0][0]
+    return opened,closed,total_profit,remaining_balance
 
 #### MAIN ####
 if __name__ == '__main__':
