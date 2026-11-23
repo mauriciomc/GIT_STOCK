@@ -1,0 +1,22 @@
+{
+    "_comment": "hyperopted by scripts/hyperopt_clecirangecross_sector.py",
+    "aerospace": 1.3,
+    "asian": 1.55,
+    "auto": 1.05,
+    "bio": 1.55,
+    "brazil": 2.05,
+    "civil": 1.05,
+    "comms": 0.8,
+    "energy": 2.05,
+    "fashion": 1.55,
+    "finance": 1.8,
+    "fintech": 0.55,
+    "goods": 1.3,
+    "health": 1.05,
+    "industry": 0.3,
+    "realestate": 0.3,
+    "retail": 0.8,
+    "tech": 2.3,
+    "tourism": 2.55,
+    "uk": 1.8
+}

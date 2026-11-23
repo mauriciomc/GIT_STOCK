@@ -1,0 +1,2 @@
+sector,n_tickers,bb_window,rsi_window,rsi_buy,rsi_sell,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+fintech,9,22.0,16.0,27.0,65.0,22.0,130.0,88.34,0.76,0.96,-24.04,15,228.1,35.71,0.59,0.79,-13.53,11,201.9

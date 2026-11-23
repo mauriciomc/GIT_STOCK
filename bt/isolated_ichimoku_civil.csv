@@ -1,0 +1,2 @@
+sector,n_tickers,conv,base,span_b,use_ha,exit_rule,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+civil,9,19,54,48,False,cloud_loss,10.0,0.0,35.4,0.25,0.25,-33.55,50,74.5,42.55,0.46,0.58,-11.23,51,74.0

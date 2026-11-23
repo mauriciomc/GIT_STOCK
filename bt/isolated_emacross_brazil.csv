@@ -1,0 +1,2 @@
+sector,n_tickers,fast,mid,slow,min_angle,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,18.0,35.0,160.0,0.75,-22.08,-0.61,-0.68,-25.24,205,8.0,-18.71,-0.93,-0.98,-25.95,116,7.7

@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,trail,sl,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+health,11,370.0,1.05,0.98,17.5,24.0,64.92,1.18,1.5,-5.82,27,106.0,40.68,0.58,0.86,-11.36,28,129.5

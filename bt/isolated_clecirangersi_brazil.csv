@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,rsi_period,rsi_buy_min,rsi_sell_max,high_band,exit_mode,tp,sl,trail,trail_activation,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,295,39.0,70.0,7,45.5,92.5,low,trail,7.0,18.0,18.75,6.5,52.24,0.71,1.03,-11.8,25,124.1,25.89,0.3,0.42,-17.64,21,172.2

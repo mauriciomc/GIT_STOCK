@@ -1,4 +1,27 @@
+.venv/
+__pycache__/
+*.pyc
 *.db
+*.sqlite
 stock_data/
+data_cache/
+backtest_results/
 *.lock
-__pycache__
+.pytest_cache/
+
+# --- private: bot tokens, chat ids (copy config/secrets.example.json -> config/secrets.json)
+config/secrets.json
+*.secret
+.env
+
+# --- market data (downloaded, large; rebuild with the data commands)
+stock_data_full/
+*.parquet
+*.csv.gz
+
+# --- local build / run leftovers
+*.egg-info/
+databases/
+bt/*.log
+nohup.out
+.*.swp

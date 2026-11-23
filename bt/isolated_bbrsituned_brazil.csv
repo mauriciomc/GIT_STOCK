@@ -1,0 +1,2 @@
+sector,n_tickers,bb_window,rsi_window,rsi_buy,rsi_sell,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,24.0,28.0,38.0,56.0,38.0,130.0,54.16,0.45,0.56,-30.27,39,118.3,50.07,0.82,1.16,-10.24,26,122.3

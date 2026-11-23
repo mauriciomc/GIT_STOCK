@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,rsi_period,rsi_buy_min,rsi_sell_max,high_band,exit_mode,tp,sl,trail,trail_activation,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+tourism,10,395,26.0,82.0,13,23.5,99.0,low,band,40.0,19.5,8.0,2.5,51.72,0.43,0.67,-18.5,58,49.0,86.28,1.24,1.79,-13.72,34,66.3

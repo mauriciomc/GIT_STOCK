@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,rsi_period,rsi_buy_min,rsi_sell_max,high_band,cooldown_bars,slope_window,long_slope_window,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,160,29.0,60.5,13,4.5,91.5,low,7,9,190,21.95,0.19,0.26,-20.9,76,45.9,39.82,0.58,0.8,-10.6,76,50.1

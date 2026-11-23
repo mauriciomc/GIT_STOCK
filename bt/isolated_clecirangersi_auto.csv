@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,rsi_period,rsi_buy_min,rsi_sell_max,high_band,exit_mode,tp,sl,trail,trail_activation,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+auto,10,305,28.0,81.0,17,19.0,57.5,high,band,16.5,18.5,17.5,15.0,58.13,0.52,0.66,-27.53,62,46.5,15.7,0.12,0.15,-15.5,71,34.1

@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,trail,sl,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+civil,9,50.0,1.25,0.99,18.0,25.0,33.63,0.43,0.55,-9.69,111,21.1,49.08,0.85,1.1,-10.85,85,24.9

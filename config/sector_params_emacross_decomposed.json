@@ -1,0 +1,136 @@
+{
+    "_comment": "decomposed: stage1=hyperopt_isolated_sector.py per sector for emacross, stage3(this)=hyperopt_weights_only.py for weights - load with git_stock.sector_strategy.load_sector_strategies()",
+    "aerospace": {
+        "fast": 20.0,
+        "mid": 45.0,
+        "slow": 220.0,
+        "min_angle": 0.9,
+        "weight": 2.05
+    },
+    "asian": {
+        "fast": 16.0,
+        "mid": 75.0,
+        "slow": 230.0,
+        "min_angle": 0.75,
+        "weight": 0.8
+    },
+    "auto": {
+        "fast": 16.0,
+        "mid": 60.0,
+        "slow": 160.0,
+        "min_angle": 0.75,
+        "weight": 0.55
+    },
+    "bio": {
+        "fast": 18.0,
+        "mid": 70.0,
+        "slow": 130.0,
+        "min_angle": 0.3,
+        "weight": 2.3
+    },
+    "brazil": {
+        "fast": 18.0,
+        "mid": 35.0,
+        "slow": 160.0,
+        "min_angle": 0.75,
+        "weight": 0.8
+    },
+    "civil": {
+        "fast": 19.0,
+        "mid": 20.0,
+        "slow": 210.0,
+        "min_angle": 0.45,
+        "weight": 1.8
+    },
+    "comms": {
+        "fast": 17.0,
+        "mid": 20.0,
+        "slow": 230.0,
+        "min_angle": 0.95,
+        "weight": 2.55
+    },
+    "energy": {
+        "fast": 16.0,
+        "mid": 30.0,
+        "slow": 190.0,
+        "min_angle": 0.9,
+        "weight": 1.05
+    },
+    "fashion": {
+        "fast": 20.0,
+        "mid": 25.0,
+        "slow": 100.0,
+        "min_angle": 0.7,
+        "weight": 1.05
+    },
+    "finance": {
+        "fast": 20.0,
+        "mid": 65.0,
+        "slow": 120.0,
+        "min_angle": 0.05,
+        "weight": 2.55
+    },
+    "fintech": {
+        "fast": 13.0,
+        "mid": 35.0,
+        "slow": 180.0,
+        "min_angle": 0.9,
+        "weight": 0.8
+    },
+    "goods": {
+        "fast": 20.0,
+        "mid": 45.0,
+        "slow": 250.0,
+        "min_angle": 1.0,
+        "weight": 2.3
+    },
+    "health": {
+        "fast": 19.0,
+        "mid": 20.0,
+        "slow": 230.0,
+        "min_angle": 0.3,
+        "weight": 0.8
+    },
+    "industry": {
+        "fast": 20.0,
+        "mid": 25.0,
+        "slow": 170.0,
+        "min_angle": 0.95,
+        "weight": 2.55
+    },
+    "realestate": {
+        "fast": 19.0,
+        "mid": 20.0,
+        "slow": 230.0,
+        "min_angle": 0.3,
+        "weight": 0.55
+    },
+    "retail": {
+        "fast": 20.0,
+        "mid": 30.0,
+        "slow": 180.0,
+        "min_angle": 0.8,
+        "weight": 1.05
+    },
+    "tech": {
+        "fast": 17.0,
+        "mid": 65.0,
+        "slow": 100.0,
+        "min_angle": 0.8,
+        "weight": 2.3
+    },
+    "tourism": {
+        "fast": 18.0,
+        "mid": 55.0,
+        "slow": 100.0,
+        "min_angle": 0.65,
+        "weight": 0.8
+    },
+    "uk": {
+        "fast": 19.0,
+        "mid": 30.0,
+        "slow": 110.0,
+        "min_angle": 0.6,
+        "weight": 1.55
+    }
+}

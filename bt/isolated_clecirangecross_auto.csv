@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,rsi_period,rsi_buy_min,rsi_sell_max,high_band,cooldown_bars,slope_window,long_slope_window,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+auto,10,70,11.0,84.0,21,20.0,51.0,low,10,7,235,188.47,0.78,1.01,-39.48,46,108.5,20.39,0.14,0.2,-31.3,47,96.6

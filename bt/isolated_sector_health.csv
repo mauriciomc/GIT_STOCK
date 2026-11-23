@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+health,11,45.0,3.0,30.0,17.0,280.0,84.43,0.66,0.91,-24.86,15,371.9,74.86,0.77,1.13,-25.89,12,453.1

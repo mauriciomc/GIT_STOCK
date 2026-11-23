@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,use_rolling,high_band,exit_mode,tp,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+retail,12,100,1.18,0.83,True,low,roi,33.0,12.0,12.0,72.79,0.74,0.94,-20.72,58,116.2,48.85,0.56,0.86,-17.59,50,108.6

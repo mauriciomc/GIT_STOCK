@@ -1,0 +1,2 @@
+sector,n_tickers,conv,base,span_b,use_ha,exit_rule,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+asian,5,12,20,92,False,cloud_loss,26.0,18.0,51.99,0.69,0.88,-18.21,39,48.4,15.55,0.17,0.21,-11.61,29,50.9

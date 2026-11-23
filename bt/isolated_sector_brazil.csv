@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,10.0,28.0,25.0,24.0,150.0,72.87,0.81,0.83,-16.02,16,86.9,16.34,0.16,0.18,-10.17,11,75.2

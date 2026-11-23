@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,use_rolling,high_band,exit_mode,tp,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+fintech,9,20,1.14,0.82,True,low,roi,35.0,7.0,16.5,49.95,0.56,0.79,-30.67,137,26.8,50.11,0.48,0.72,-21.8,95,43.9

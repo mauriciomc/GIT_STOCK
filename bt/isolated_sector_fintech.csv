@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+fintech,9,30.0,8.0,30.0,39.0,360.0,124.76,0.65,0.89,-36.79,53,135.4,73.1,0.52,0.76,-28.54,25,229.5

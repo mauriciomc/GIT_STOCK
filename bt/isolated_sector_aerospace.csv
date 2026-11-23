@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,65.0,5.0,8.0,39.0,380.0,56.78,0.26,0.89,-29.2,170,24.8,57.69,0.81,1.22,-18.43,116,37.0

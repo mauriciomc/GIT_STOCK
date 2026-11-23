@@ -1,0 +1,2 @@
+sector,n_tickers,fast,mid,slow,min_angle,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+realestate,10,19.0,20.0,230.0,0.3,-22.62,-0.83,-0.91,-31.28,246,8.6,-29.9,-1.44,-1.65,-30.74,198,7.3

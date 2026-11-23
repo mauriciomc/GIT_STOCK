@@ -1,0 +1,2 @@
+sector,n_tickers,window,buy_pct,sell_pct,high_band,exit_mode,tp,sl,trail,trail_activation,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,90,12.0,79.0,low,trail,33.0,19.5,18.25,13.5,52.0,0.38,0.52,-37.5,48,111.8,85.64,0.93,1.39,-14.44,34,169.5

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git_stock"
+version = "2.0.0"
+description = "Stock signal / backtest / optimise toolkit (Yahoo Finance)"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=2.1",
+    "numpy>=1.24",
+    "yfinance>=0.2.50",
+    "requests>=2.28",
+    "PyYAML>=6",
+]
+
+[project.optional-dependencies]
+charts = ["matplotlib>=3.7"]
+optuna = ["optuna>=3.4"]
+dev = ["pytest>=7.4", "matplotlib>=3.7"]
+
+[project.scripts]
+git-stock = "git_stock.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["git_stock*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

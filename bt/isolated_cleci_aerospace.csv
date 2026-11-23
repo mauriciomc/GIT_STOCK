@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,use_rolling,high_band,exit_mode,tp,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,150,1.16,0.81,True,low,trail,15.0,21.0,18.0,48.67,0.42,0.67,-20.29,53,92.5,60.68,0.63,0.85,-17.25,39,136.1

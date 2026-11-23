@@ -1,0 +1,2 @@
+sector,n_tickers,bb_window,rsi_window,rsi_buy,rsi_sell,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+uk,28,28.0,14.0,40.0,64.0,27.0,40.0,55.37,0.5,0.69,-25.56,40,202.2,58.94,0.64,0.94,-19.5,37,198.1

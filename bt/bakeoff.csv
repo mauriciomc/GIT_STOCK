@@ -1,0 +1,2 @@
+strategy,params,IS_return%,IS_CAGR%,IS_Sharpe,IS_maxDD%,IS_PF,IS_win%,IS_trades,IS_hold,OOS_return%,OOS_CAGR%,OOS_Sharpe,OOS_maxDD%,OOS_PF,OOS_win%,OOS_trades,OOS_hold
+ichimoku,"{'conv': 14, 'base': 28, 'span_b': 64, 'use_ha': True, 'exit_rule': 'cloud_loss', 'sl': 28.0, 'trail': 1.0}",563.18,50.8,11.59,-0.92,3.66,57.26,24073,1.1,466.94,49.91,13.18,-0.67,3.59,57.76,21024,1.1

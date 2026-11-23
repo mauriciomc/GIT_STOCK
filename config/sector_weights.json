@@ -1,0 +1,22 @@
+{
+    "_comment": "hyperopted by scripts/hyperopt_bbrsi_sector.py",
+    "aerospace": 0.0,
+    "asian": 0.75,
+    "auto": 0.5,
+    "bio": 1.25,
+    "brazil": 0.0,
+    "civil": 0.0,
+    "comms": 1.75,
+    "energy": 2.5,
+    "fashion": 0.25,
+    "finance": 0.75,
+    "fintech": 0.5,
+    "goods": 2.25,
+    "health": 1.5,
+    "industry": 0.0,
+    "realestate": 0.25,
+    "retail": 2.5,
+    "tech": 0.75,
+    "tourism": 0.25,
+    "uk": 0.25
+}

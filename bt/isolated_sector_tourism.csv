@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+tourism,10,45.0,29.0,25.0,34.0,30.0,41.77,0.32,0.41,-32.49,59,62.9,71.36,0.68,1.01,-14.66,62,77.0

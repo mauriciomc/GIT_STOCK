@@ -1,0 +1,2 @@
+sector,n_tickers,window,entry_mult,exit_mult,trail,sl,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,260.0,1.09,0.99,22.5,6.0,35.86,0.29,0.4,-22.28,101,33.2,54.11,0.63,0.91,-18.92,74,50.4

@@ -1,0 +1,2 @@
+sector,n_tickers,conv,base,span_b,use_ha,exit_rule,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+brazil,12,5,24,56,True,cloud_loss,23.0,0.0,58.9,0.52,0.7,-17.45,87,53.3,-5.27,-0.26,-0.34,-29.1,59,56.4

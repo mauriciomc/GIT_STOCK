@@ -1,0 +1,174 @@
+{
+    "_comment": "decomposed: stage1=hyperopt_isolated_sector.py per sector for bbrsituned, stage3(this)=hyperopt_weights_only.py for weights - load with git_stock.sector_strategy.load_sector_strategies()",
+    "aerospace": {
+        "bb_window": 30.0,
+        "rsi_window": 8.0,
+        "rsi_buy": 25.0,
+        "rsi_sell": 68.0,
+        "sl": 24.0,
+        "tp": 115.0,
+        "weight": 1.55
+    },
+    "asian": {
+        "bb_window": 28.0,
+        "rsi_window": 12.0,
+        "rsi_buy": 24.0,
+        "rsi_sell": 80.0,
+        "sl": 22.0,
+        "tp": 150.0,
+        "weight": 1.3
+    },
+    "auto": {
+        "bb_window": 24.0,
+        "rsi_window": 11.0,
+        "rsi_buy": 37.0,
+        "rsi_sell": 73.0,
+        "sl": 13.0,
+        "tp": 145.0,
+        "weight": 1.8
+    },
+    "bio": {
+        "bb_window": 28.0,
+        "rsi_window": 13.0,
+        "rsi_buy": 45.0,
+        "rsi_sell": 58.0,
+        "sl": 21.0,
+        "tp": 140.0,
+        "weight": 1.55
+    },
+    "brazil": {
+        "bb_window": 24.0,
+        "rsi_window": 28.0,
+        "rsi_buy": 38.0,
+        "rsi_sell": 56.0,
+        "sl": 38.0,
+        "tp": 130.0,
+        "weight": 2.05
+    },
+    "civil": {
+        "bb_window": 16.0,
+        "rsi_window": 10.0,
+        "rsi_buy": 37.0,
+        "rsi_sell": 62.0,
+        "sl": 25.0,
+        "tp": 55.0,
+        "weight": 0.55
+    },
+    "comms": {
+        "bb_window": 14.0,
+        "rsi_window": 24.0,
+        "rsi_buy": 34.0,
+        "rsi_sell": 65.0,
+        "sl": 26.0,
+        "tp": 145.0,
+        "weight": 0.8
+    },
+    "energy": {
+        "bb_window": 22.0,
+        "rsi_window": 12.0,
+        "rsi_buy": 39.0,
+        "rsi_sell": 68.0,
+        "sl": 16.0,
+        "tp": 145.0,
+        "weight": 2.05
+    },
+    "fashion": {
+        "bb_window": 14.0,
+        "rsi_window": 13.0,
+        "rsi_buy": 21.0,
+        "rsi_sell": 69.0,
+        "sl": 14.0,
+        "tp": 30.0,
+        "weight": 1.3
+    },
+    "finance": {
+        "bb_window": 36.0,
+        "rsi_window": 10.0,
+        "rsi_buy": 37.0,
+        "rsi_sell": 57.0,
+        "sl": 34.0,
+        "tp": 85.0,
+        "weight": 1.8
+    },
+    "fintech": {
+        "bb_window": 22.0,
+        "rsi_window": 16.0,
+        "rsi_buy": 27.0,
+        "rsi_sell": 65.0,
+        "sl": 22.0,
+        "tp": 130.0,
+        "weight": 0.3
+    },
+    "goods": {
+        "bb_window": 10.0,
+        "rsi_window": 23.0,
+        "rsi_buy": 31.0,
+        "rsi_sell": 68.0,
+        "sl": 39.0,
+        "tp": 55.0,
+        "weight": 1.05
+    },
+    "health": {
+        "bb_window": 12.0,
+        "rsi_window": 7.0,
+        "rsi_buy": 20.0,
+        "rsi_sell": 79.0,
+        "sl": 16.0,
+        "tp": 75.0,
+        "weight": 0.55
+    },
+    "industry": {
+        "bb_window": 20.0,
+        "rsi_window": 14.0,
+        "rsi_buy": 27.0,
+        "rsi_sell": 77.0,
+        "sl": 25.0,
+        "tp": 110.0,
+        "weight": 0.55
+    },
+    "realestate": {
+        "bb_window": 40.0,
+        "rsi_window": 29.0,
+        "rsi_buy": 37.0,
+        "rsi_sell": 75.0,
+        "sl": 18.0,
+        "tp": 35.0,
+        "weight": 2.55
+    },
+    "retail": {
+        "bb_window": 12.0,
+        "rsi_window": 14.0,
+        "rsi_buy": 23.0,
+        "rsi_sell": 69.0,
+        "sl": 39.0,
+        "tp": 95.0,
+        "weight": 2.05
+    },
+    "tech": {
+        "bb_window": 10.0,
+        "rsi_window": 22.0,
+        "rsi_buy": 30.0,
+        "rsi_sell": 67.0,
+        "sl": 37.0,
+        "tp": 110.0,
+        "weight": 0.3
+    },
+    "tourism": {
+        "bb_window": 18.0,
+        "rsi_window": 20.0,
+        "rsi_buy": 44.0,
+        "rsi_sell": 56.0,
+        "sl": 12.0,
+        "tp": 75.0,
+        "weight": 2.3
+    },
+    "uk": {
+        "bb_window": 28.0,
+        "rsi_window": 14.0,
+        "rsi_buy": 40.0,
+        "rsi_sell": 64.0,
+        "sl": 27.0,
+        "tp": 40.0,
+        "weight": 2.3
+    }
+}

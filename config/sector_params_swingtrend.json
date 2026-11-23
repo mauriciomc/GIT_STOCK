@@ -1,0 +1,155 @@
+{
+    "_comment": "hyperopted by scripts/hyperopt_swingtrend_full_sector.py - per-sector strategy params + stake weight, load with git_stock.sector_strategy.load_sector_strategies()",
+    "aerospace": {
+        "lookback": 30,
+        "reversal_pct": 25.0,
+        "trail_pct": 10.0,
+        "sl": 19.0,
+        "tp": 140.0,
+        "weight": 1.8
+    },
+    "asian": {
+        "lookback": 70,
+        "reversal_pct": 23.0,
+        "trail_pct": 13.0,
+        "sl": 17.0,
+        "tp": 380.0,
+        "weight": 1.8
+    },
+    "auto": {
+        "lookback": 45,
+        "reversal_pct": 26.0,
+        "trail_pct": 12.0,
+        "sl": 10.0,
+        "tp": 140.0,
+        "weight": 2.3
+    },
+    "bio": {
+        "lookback": 10,
+        "reversal_pct": 16.0,
+        "trail_pct": 10.0,
+        "sl": 13.0,
+        "tp": 220.0,
+        "weight": 1.8
+    },
+    "brazil": {
+        "lookback": 90,
+        "reversal_pct": 22.0,
+        "trail_pct": 14.0,
+        "sl": 14.0,
+        "tp": 110.0,
+        "weight": 1.55
+    },
+    "civil": {
+        "lookback": 30,
+        "reversal_pct": 10.0,
+        "trail_pct": 28.0,
+        "sl": 24.0,
+        "tp": 180.0,
+        "weight": 0.8
+    },
+    "comms": {
+        "lookback": 100,
+        "reversal_pct": 20.0,
+        "trail_pct": 24.0,
+        "sl": 39.0,
+        "tp": 180.0,
+        "weight": 1.05
+    },
+    "energy": {
+        "lookback": 40,
+        "reversal_pct": 13.0,
+        "trail_pct": 22.0,
+        "sl": 39.0,
+        "tp": 300.0,
+        "weight": 1.05
+    },
+    "fashion": {
+        "lookback": 50,
+        "reversal_pct": 23.0,
+        "trail_pct": 5.0,
+        "sl": 35.0,
+        "tp": 90.0,
+        "weight": 1.8
+    },
+    "finance": {
+        "lookback": 15,
+        "reversal_pct": 6.0,
+        "trail_pct": 6.0,
+        "sl": 15.0,
+        "tp": 240.0,
+        "weight": 0.8
+    },
+    "fintech": {
+        "lookback": 10,
+        "reversal_pct": 12.0,
+        "trail_pct": 21.0,
+        "sl": 15.0,
+        "tp": 280.0,
+        "weight": 1.55
+    },
+    "goods": {
+        "lookback": 55,
+        "reversal_pct": 4.0,
+        "trail_pct": 13.0,
+        "sl": 14.0,
+        "tp": 260.0,
+        "weight": 1.8
+    },
+    "health": {
+        "lookback": 85,
+        "reversal_pct": 15.0,
+        "trail_pct": 30.0,
+        "sl": 39.0,
+        "tp": 190.0,
+        "weight": 1.8
+    },
+    "industry": {
+        "lookback": 20,
+        "reversal_pct": 15.0,
+        "trail_pct": 22.0,
+        "sl": 38.0,
+        "tp": 60.0,
+        "weight": 2.55
+    },
+    "realestate": {
+        "lookback": 30,
+        "reversal_pct": 22.0,
+        "trail_pct": 10.0,
+        "sl": 34.0,
+        "tp": 80.0,
+        "weight": 1.8
+    },
+    "retail": {
+        "lookback": 55,
+        "reversal_pct": 11.0,
+        "trail_pct": 9.0,
+        "sl": 30.0,
+        "tp": 110.0,
+        "weight": 1.55
+    },
+    "tech": {
+        "lookback": 90,
+        "reversal_pct": 25.0,
+        "trail_pct": 17.0,
+        "sl": 32.0,
+        "tp": 400.0,
+        "weight": 0.55
+    },
+    "tourism": {
+        "lookback": 10,
+        "reversal_pct": 23.0,
+        "trail_pct": 30.0,
+        "sl": 30.0,
+        "tp": 30.0,
+        "weight": 1.05
+    },
+    "uk": {
+        "lookback": 50,
+        "reversal_pct": 5.0,
+        "trail_pct": 8.0,
+        "sl": 35.0,
+        "tp": 80.0,
+        "weight": 2.3
+    }
+}

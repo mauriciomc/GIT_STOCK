@@ -1,0 +1,22 @@
+{
+    "_comment": "hyperopted by scripts/hyperopt_swingtrend_sector_tuned.py",
+    "aerospace": 0.8,
+    "asian": 1.3,
+    "auto": 2.3,
+    "bio": 2.3,
+    "brazil": 2.3,
+    "civil": 1.05,
+    "comms": 1.05,
+    "energy": 1.05,
+    "fashion": 0.55,
+    "finance": 1.8,
+    "fintech": 1.55,
+    "goods": 0.3,
+    "health": 2.3,
+    "industry": 1.8,
+    "realestate": 2.55,
+    "retail": 0.3,
+    "tech": 1.55,
+    "tourism": 1.8,
+    "uk": 2.55
+}

@@ -1,0 +1,2 @@
+sector,n_tickers,conv,base,span_b,use_ha,exit_rule,sl,trail,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,16,42,112,False,cloud_loss,19.0,0.0,17.91,0.11,0.16,-18.21,41,91.3,28.74,0.37,0.49,-15.35,36,122.5

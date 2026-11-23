@@ -1,0 +1,6 @@
+strategy,params,IS_return%,IS_CAGR%,IS_Sharpe,IS_maxDD%,IS_PF,IS_win%,IS_trades,IS_hold,OOS_return%,OOS_CAGR%,OOS_Sharpe,OOS_maxDD%,OOS_PF,OOS_win%,OOS_trades,OOS_hold
+clecitrail,"{'window': np.float64(60.0), 'entry_mult': np.float64(1.08), 'exit_mult': np.float64(0.87), 'trail': np.float64(8.0), 'sl': np.float64(29.0)}",67.24,11.81,0.73,-19.83,1.34,43.46,2211,14.6,69.88,13.16,1.03,-14.2,1.44,45.67,1811,15.7
+bbrsi,"{'bb_window': np.float64(14.0), 'rsi_window': np.float64(27.0), 'rsi_buy': np.float64(38.0), 'rsi_sell': np.float64(75.0)}",69.02,12.07,0.69,-27.55,2.23,16.56,326,55.5,60.1,11.61,0.93,-12.22,2.75,19.81,207,62.5
+cleci,"{'window': 270, 'entry_mult': 1.12, 'exit_mult': 0.85, 'use_rolling': False, 'high_band': 'high', 'exit_mode': 'band', 'tp': 29.0, 'sl': 22.0, 'trail': 6.0}",77.62,13.28,0.65,-21.51,2.22,23.89,406,40.7,50.31,9.98,0.93,-8.85,2.69,19.1,178,58.8
+ichimoku,"{'conv': 11, 'base': 34, 'span_b': 84, 'use_ha': True, 'exit_rule': 'kijun_break', 'sl': 8.0, 'trail': 18.0}",47.11,8.75,0.48,-15.54,1.29,38.65,1894,15.0,21.99,4.75,0.23,-17.89,1.17,34.04,1513,15.2
+emacross,"{'fast': np.float64(16.0), 'mid': np.float64(30.0), 'slow': np.float64(160.0), 'min_angle': np.float64(0.45)}",28.28,5.56,0.31,-14.0,1.14,26.62,3238,7.5,-8.43,-2.03,-0.39,-17.51,0.95,25.1,2661,7.1

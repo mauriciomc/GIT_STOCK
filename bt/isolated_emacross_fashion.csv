@@ -1,0 +1,2 @@
+sector,n_tickers,fast,mid,slow,min_angle,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+fashion,10,20.0,25.0,100.0,0.7,-25.95,-0.72,-0.78,-42.1,161,7.8,-17.01,-0.64,-0.72,-23.27,195,7.4

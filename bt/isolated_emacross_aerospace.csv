@@ -1,0 +1,2 @@
+sector,n_tickers,fast,mid,slow,min_angle,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+aerospace,9,20.0,45.0,220.0,0.9,-19.9,-0.55,-0.84,-23.44,203,7.8,-33.58,-1.36,-1.59,-36.06,202,7.9

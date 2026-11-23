@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+energy,11,100.0,28.0,24.0,18.0,50.0,81.23,0.53,0.83,-48.28,40,98.3,44.28,0.39,0.54,-22.19,26,185.2

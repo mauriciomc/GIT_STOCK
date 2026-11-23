@@ -40,8 +40,6 @@ class telegram_bot():
     interval = 0
 
     def trader_tick(self, updater):
-        #updater.bot.sendMessage(chat_id="-632284693",text="Trader tick: Analyzing")
-        #updater.bot.sendMessage(chat_id=self.config['telegram']['chat_id'],text="Trader tick: Analyzing")
         self.opened_trades,self.closed_trades,self.profit,self.balance=trader.main(self.config)
         current_time = dt.datetime.now().time()
         sleep_time = 0
@@ -135,7 +133,6 @@ class telegram_bot():
         # Make sure to set use_context=True to use the new context based callbacks
         # "Live" bot
         updater = Updater(self.config['telegram']['token'], use_context=True)
-        # Test bot updater = Updater("1668686740:AAEv9ydKGjd8JJaFv2EhOD5KmglRguJ2fZc", use_context=True)
 
         # Get the dispatcher to register handlers
         dp = updater.dispatcher

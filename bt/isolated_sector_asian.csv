@@ -1,0 +1,2 @@
+sector,n_tickers,lookback,reversal_pct,trail_pct,sl,tp,IS_return%,IS_Sharpe,IS_Sortino,IS_maxDD%,IS_trades,IS_hold,OOS_return%,OOS_Sharpe,OOS_Sortino,OOS_maxDD%,OOS_trades,OOS_hold
+asian,5,60.0,29.0,16.0,32.0,190.0,67.68,0.88,1.05,-8.58,26,61.7,32.52,0.58,0.74,-9.61,24,78.2
